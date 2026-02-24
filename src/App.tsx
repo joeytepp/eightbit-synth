@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 
 import useSynth from "./hooks/use-synth";
 
@@ -32,7 +32,7 @@ const MidiPlayer: React.FC = () => {
       <button onClick={generateMidi}>Generate MIDI</button>
 
       <button
-        onClick={playMidi}
+        onClick={() => playMidi}
         disabled={!midiData}
         style={{ marginLeft: "1rem" }}
       >
