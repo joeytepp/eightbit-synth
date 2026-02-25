@@ -1,43 +1,9 @@
 import React, { useState } from "react";
 import * as Tone from "tone";
-
-const NOTE_OPTIONS = [
-  { name: " ", midi: 0 },
-  { name: "A2", midi: 45 },
-  { name: "A#2", midi: 46 },
-  { name: "B2", midi: 47 },
-  { name: "C3", midi: 48 },
-  { name: "C#3", midi: 49 },
-  { name: "D3", midi: 50 },
-  { name: "D#3", midi: 51 },
-  { name: "E3", midi: 52 },
-  { name: "F3", midi: 53 },
-  { name: "F#3", midi: 54 },
-  { name: "G3", midi: 55 },
-  { name: "G#3", midi: 56 },
-  { name: "A3", midi: 57 },
-  { name: "A#3", midi: 58 },
-  { name: "B3", midi: 59 },
-  { name: "C4", midi: 60 },
-  { name: "C#4", midi: 61 },
-  { name: "D4", midi: 62 },
-  { name: "D#4", midi: 63 },
-  { name: "E4", midi: 64 },
-  { name: "F4", midi: 65 },
-  { name: "F#4", midi: 66 },
-  { name: "G4", midi: 67 },
-  { name: "G#4", midi: 68 },
-  { name: "A4", midi: 69 },
-  { name: "A#4", midi: 70 },
-  { name: "B4", midi: 71 },
-  { name: "C5", midi: 72 },
-];
+import { INITIAL_NOTE_VALUES, NOTE_OPTIONS } from "../constants";
 
 const InstantDynamicPlayer: React.FC = () => {
-  // Initial 8 notes (C major scale)
-  const [notes, setNotes] = useState<number[]>([
-    60, 62, 64, 65, 67, 69, 71, 72,
-  ]);
+  const [notes, setNotes] = useState<number[]>(INITIAL_NOTE_VALUES);
 
   const playSequence = async () => {
     await Tone.start();
