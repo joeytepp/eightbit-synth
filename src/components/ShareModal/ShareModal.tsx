@@ -1,14 +1,25 @@
 import React, { useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
+import { encodeSharePayload } from "../../utils/shareUrl";
+import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function ShareModal() {
   const { closeModal } = useModal();
 
   const [artist, setArtist] = useState("");
   const [title, setTitle] = useState("");
+  const { tracks } = useTrackContext();
 
   return (
-    <div style={{ padding: "1rem" }}>
+    <div
+      style={{
+        padding: "0 1rem 1rem",
+        margin: "0 auto",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -40,7 +51,19 @@ export default function ShareModal() {
           }}
         >
           <button onClick={() => closeModal()}>Cancel</button>
-          <button>Share</button>
+          <button
+            onClick={() => {
+              const shareUrl = encodeSharePayload({
+                title,
+                artist,
+                tracks: tracks,
+              });
+
+              window.location.href = shareUrl;
+            }}
+          >
+            Share
+          </button>
         </div>
       </div>
     </div>

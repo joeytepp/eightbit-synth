@@ -1,10 +1,7 @@
 import { useTrackContext } from "../../contexts/TrackContext";
-import { useModal } from "../../contexts/ModalContext";
-import ShareModal from "../ShareModal/ShareModal";
 
 export default function Footer() {
   const { playSequence } = useTrackContext();
-  const { openModal } = useModal();
 
   return (
     <div
@@ -16,7 +13,18 @@ export default function Footer() {
       }}
     >
       <button onClick={() => playSequence()}>Play Sequence</button>
-      <button onClick={() => openModal(<ShareModal />)}>Share</button>
+      <div
+        style={{
+          position: "absolute",
+          bottom: "2rem",
+          left: "50%",
+          right: "50%",
+          width: "100%",
+        }}
+      >
+        Copyright <a href="https://joeytepperman.com">Joey Tepperman</a>{" "}
+        {new Date().getFullYear()}
+      </div>
     </div>
   );
 }

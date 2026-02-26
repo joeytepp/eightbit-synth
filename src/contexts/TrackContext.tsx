@@ -28,7 +28,7 @@ function loadTracksFromStorage(): TrackData[] | null {
         typeof t === "object" &&
         typeof (t as TrackData).id === "string" &&
         Array.isArray((t as TrackData).notes) &&
-        (t as TrackData).notes.every((n) => typeof n === "number")
+        (t as TrackData).notes.every((n) => typeof n === "number"),
     );
     return valid ? (parsed as TrackData[]) : null;
   } catch {
@@ -110,8 +110,8 @@ export function TrackProvider({ children }: { children: ReactNode }) {
   const addNote = useCallback((trackId: string) => {
     setTracks((prev) =>
       prev.map((t) =>
-        t.id === trackId ? { ...t, notes: [...t.notes, 60] } : t
-      )
+        t.id === trackId ? { ...t, notes: [...t.notes, 60] } : t,
+      ),
     );
   }, []);
 
@@ -120,8 +120,8 @@ export function TrackProvider({ children }: { children: ReactNode }) {
       prev.map((t) =>
         t.id === trackId
           ? { ...t, notes: t.notes.filter((_, i) => i !== index) }
-          : t
-      )
+          : t,
+      ),
     );
   }, []);
 
@@ -133,10 +133,10 @@ export function TrackProvider({ children }: { children: ReactNode }) {
           const updated = [...t.notes];
           updated[index] = newMidi;
           return { ...t, notes: updated };
-        })
+        }),
       );
     },
-    []
+    [],
   );
 
   const value: TrackContextValue = {
