@@ -13,3 +13,8 @@ Simple web-based synth app that allows you to create and share sequences of note
 - React
 - Tone.js
 - Midi.js
+
+## Still TODO
+
+- Sharing functionality
+- Hosting on Vercel
