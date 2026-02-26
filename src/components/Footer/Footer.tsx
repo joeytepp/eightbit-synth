@@ -1,7 +1,10 @@
 import { useTrackContext } from "../../contexts/TrackContext";
+import { useModal } from "../../contexts/ModalContext";
+import ShareModal from "../ShareModal/ShareModal";
 
 export default function Footer() {
   const { playSequence } = useTrackContext();
+  const { openModal } = useModal();
 
   return (
     <div
@@ -13,7 +16,7 @@ export default function Footer() {
       }}
     >
       <button onClick={() => playSequence()}>Play Sequence</button>
-      <button>Share</button>
+      <button onClick={() => openModal(<ShareModal />)}>Share</button>
     </div>
   );
 }
