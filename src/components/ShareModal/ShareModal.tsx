@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useModal } from "../../contexts/ModalContext";
 import { decodeSharePayload, encodeSharePayload } from "../../utils/shareUrl";
 import { useTrackContext } from "../../contexts/TrackContext";
@@ -8,7 +8,6 @@ import { useTrackContext } from "../../contexts/TrackContext";
 export default function ShareModal() {
   const { closeModal } = useModal();
   const { tracks, title, artist, setTitle, setArtist } = useTrackContext();
-  const [buttonPressed, setButtonPressed] = useState(false);
   const dataLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -86,19 +85,12 @@ export default function ShareModal() {
             <button onClick={() => closeModal()}>Cancel</button>
             <button
               disabled={!title || !artist}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setButtonPressed(true);
-                }
-              }}
               onClick={async () => {
                 const shareUrl = encodeSharePayload({
                   title,
                   artist,
                   tracks: tracks,
                 });
-
-                setButtonPressed(true);
 
                 await new Promise((resolve) => {
                   navigator.clipboard.writeText(
