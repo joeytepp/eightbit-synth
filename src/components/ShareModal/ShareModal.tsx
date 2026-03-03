@@ -1,71 +1,121 @@
-import React, { useState } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
-import { encodeSharePayload } from "../../utils/shareUrl";
+import { decodeSharePayload, encodeSharePayload } from "../../utils/shareUrl";
 import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function ShareModal() {
   const { closeModal } = useModal();
+  const { tracks, title, artist, setTitle, setArtist } = useTrackContext();
+  const [buttonPressed, setButtonPressed] = useState(false);
+  const dataLoadedRef = useRef(false);
 
-  const [artist, setArtist] = useState("");
-  const [title, setTitle] = useState("");
-  const { tracks } = useTrackContext();
+  useEffect(() => {
+    if (dataLoadedRef.current) return;
+    dataLoadedRef.current = true;
+
+    const payload = decodeSharePayload(
+      window.location.href.split("/").pop() || "",
+    );
+    if (payload) {
+      setTitle(payload.title);
+      setArtist(payload.artist);
+    }
+  }, [setTitle, setArtist]);
 
   return (
-    <div
-      style={{
-        padding: "0 1rem 1rem",
-        margin: "0 auto",
-        backgroundColor: "#fff",
-        borderRadius: "8px",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-      }}
-    >
+    <>
+      {title && artist && (
+        <div style={{ margin: "1rem", color: "AccentColor" }}>
+          <p>
+            "{title}" by {artist}
+          </p>
+        </div>
+      )}
+
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          padding: "0 1rem 1rem",
+          margin: "0 auto",
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
         }}
       >
-        <h2>Share Song</h2>
-        <button onClick={() => closeModal()}>X</button>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div>
-          <label htmlFor="song-name">Title: </label>
-          <div>
-            <input type="text" id="song-name" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="song-name">Artist: </label>
-          <div>
-            <input type="text" id="song-name" />
-          </div>
-        </div>
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            gap: "1rem",
+            alignItems: "center",
           }}
         >
-          <button onClick={() => closeModal()}>Cancel</button>
-          <button
-            onClick={() => {
-              const shareUrl = encodeSharePayload({
-                title,
-                artist,
-                tracks: tracks,
-              });
-
-              window.location.href = shareUrl;
+          <h2>Share Song</h2>
+          <button onClick={() => closeModal()}>X</button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div>
+            <label htmlFor="song-title">Title: </label>
+            <div>
+              <input
+                type="text"
+                id="song-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="song-artist">Artist: </label>
+            <div>
+              <input
+                type="text"
+                id="song-artist"
+                value={artist}
+                onChange={(e) => setArtist(e.target.value)}
+              />
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "1rem",
             }}
           >
-            Share
-          </button>
+            <button onClick={() => closeModal()}>Cancel</button>
+            <button
+              disabled={!title || !artist}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setButtonPressed(true);
+                }
+              }}
+              onClick={async () => {
+                const shareUrl = encodeSharePayload({
+                  title,
+                  artist,
+                  tracks: tracks,
+                });
+
+                setButtonPressed(true);
+
+                await new Promise((resolve) => {
+                  navigator.clipboard.writeText(
+                    window.location.origin + "/" + shareUrl,
+                  );
+                  setTimeout(resolve, 1000);
+                });
+
+                window.location.href = shareUrl;
+                window.alert("Copied to clipboard");
+              }}
+            >
+              Share
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

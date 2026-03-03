@@ -4,10 +4,16 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
 import * as Tone from "tone";
-import { INITIAL_NOTE_VALUES } from "../constants";
+import {
+  INITIAL_NOTE_VALUES,
+  ARTIST_LOCAL_STORAGE_KEY,
+  TITLE_LOCAL_STORAGE_KEY,
+} from "../constants";
+import { decodeSharePayload } from "../utils/shareUrl";
 
 export interface TrackData {
   id: string;
@@ -38,6 +44,10 @@ function loadTracksFromStorage(): TrackData[] | null {
 
 export interface TrackContextValue {
   tracks: TrackData[];
+  title: string;
+  artist: string;
+  setTitle: (title: string) => void;
+  setArtist: (artist: string) => void;
   addTrack: () => void;
   removeTrack: (id: string) => void;
   addNote: (trackId: string) => void;
@@ -68,9 +78,39 @@ export function TrackProvider({ children }: { children: ReactNode }) {
     return stored ?? [createInitialTrack()];
   });
 
+  const [title, setTitle] = useState(() => {
+    return localStorage.getItem(TITLE_LOCAL_STORAGE_KEY) ?? "";
+  });
+  const [artist, setArtist] = useState(() => {
+    return localStorage.getItem(ARTIST_LOCAL_STORAGE_KEY) ?? "";
+  });
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tracks));
   }, [tracks]);
+
+  useEffect(() => {
+    localStorage.setItem(TITLE_LOCAL_STORAGE_KEY, title);
+  }, [title]);
+
+  useEffect(() => {
+    localStorage.setItem(ARTIST_LOCAL_STORAGE_KEY, artist);
+  }, [artist]);
+
+  // Apply share URL payload to context on initial load
+  const appliedShareRef = useRef(false);
+  useEffect(() => {
+    if (appliedShareRef.current) return;
+    appliedShareRef.current = true;
+    const payload = decodeSharePayload(
+      window.location.href.split("/").pop() || "",
+    );
+    if (payload) {
+      setTitle(payload.title);
+      setArtist(payload.artist);
+      window.history.replaceState({}, "", "/");
+    }
+  }, [setTitle, setArtist]);
 
   const playSequence = useCallback(async () => {
     await Tone.start();
@@ -141,6 +181,10 @@ export function TrackProvider({ children }: { children: ReactNode }) {
 
   const value: TrackContextValue = {
     tracks,
+    title,
+    artist,
+    setTitle,
+    setArtist,
     addTrack,
     removeTrack,
     addNote,

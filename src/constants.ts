@@ -52,3 +52,6 @@ export const NOTE_OPTIONS = [
   { name: "B4", midi: 71 },
   { name: "C5", midi: 72 },
 ];
+
+export const ARTIST_LOCAL_STORAGE_KEY = "artist";
+export const TITLE_LOCAL_STORAGE_KEY = "title";

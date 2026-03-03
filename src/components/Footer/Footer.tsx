@@ -22,7 +22,7 @@ export default function Footer() {
           width: "100%",
         }}
       >
-        Copyright <a href="https://joeytepperman.com">Joey Tepperman</a>{" "}
+        © Copyright <a href="https://joeytepperman.com">Joey Tepperman</a>{" "}
         {new Date().getFullYear()}
       </div>
     </div>
