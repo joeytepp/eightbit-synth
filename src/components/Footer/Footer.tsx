@@ -15,11 +15,8 @@ export default function Footer() {
       <button onClick={() => playSequence()}>Play Sequence</button>
       <div
         style={{
-          position: "absolute",
-          bottom: "2rem",
-          left: "50%",
-          right: "50%",
-          width: "100%",
+          paddingTop: "1rem",
+          margin: "0 auto",
         }}
       >
         © Copyright <a href="https://joeytepperman.com">Joey Tepperman</a>{" "}

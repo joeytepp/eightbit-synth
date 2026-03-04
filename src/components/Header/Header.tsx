@@ -2,10 +2,11 @@ import React from "react";
 import ShareModal from "../ShareModal/ShareModal";
 import { useModal } from "../../contexts/ModalContext";
 import { useTrackContext } from "../../contexts/TrackContext";
+import SettingsModal from "../SettingsModal/SettingsModal";
 
 export default function Header() {
   const { openModal } = useModal();
-  const { title, artist } = useTrackContext();
+  const { title, artist, resetContext } = useTrackContext();
 
   return (
     <div
@@ -15,13 +16,23 @@ export default function Header() {
         alignItems: "center",
       }}
     >
-      {title && artist && (
-        <div style={{ marginBottom: "1rem", color: "AccentColor" }}>
-          <p>
+      <div
+        style={{
+          marginBottom: "1rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
+      >
+        {title && artist && (
+          <p style={{ margin: 0, color: "AccentColor" }}>
             "{title}" by {artist}
           </p>
-        </div>
-      )}
+        )}
+        <button type="button" onClick={resetContext} title="Reset project">
+          Reset
+        </button>
+      </div>
       <div
         style={{
           padding: "1rem 0",
@@ -36,7 +47,8 @@ export default function Header() {
           </h2>
         </div>
       </div>
-      <div>
+      <div style={{ display: "flex", gap: "1rem" }}>
+        <button onClick={() => openModal(<SettingsModal />)}>Settings</button>
         <button onClick={() => openModal(<ShareModal />)}>Share</button>
       </div>
     </div>

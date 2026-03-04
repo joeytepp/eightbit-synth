@@ -55,3 +55,25 @@ export const NOTE_OPTIONS = [
 
 export const ARTIST_LOCAL_STORAGE_KEY = "artist";
 export const TITLE_LOCAL_STORAGE_KEY = "title";
+export const TEMPO_LOCAL_STORAGE_KEY = "tempo";
+export const DEFAULT_TEMPO = 120;
+
+export type WaveformType = "sine" | "triangle" | "square" | "sawtooth";
+export const WAVEFORM_OPTIONS: { value: WaveformType; label: string }[] = [
+  { value: "sine", label: "Sine (soft)" },
+  { value: "triangle", label: "Triangle" },
+  { value: "square", label: "Square" },
+  { value: "sawtooth", label: "Sawtooth (bright)" },
+];
+export const WAVEFORM_LOCAL_STORAGE_KEY = "waveform";
+export const DEFAULT_WAVEFORM: WaveformType = "sine";
+
+export const ATTACK_LOCAL_STORAGE_KEY = "attack";
+export const DEFAULT_ATTACK = 0.05; // seconds; higher = softer onset
+export const ATTACK_MIN = 0.01;
+export const ATTACK_MAX = 0.5;
+
+export const NOTE_DURATION_LOCAL_STORAGE_KEY = "noteDuration";
+export const DEFAULT_NOTE_DURATION = 0.45; // seconds
+export const NOTE_DURATION_MIN = 0.1;
+export const NOTE_DURATION_MAX = 1.5;
