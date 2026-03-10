@@ -77,3 +77,24 @@ export const NOTE_DURATION_LOCAL_STORAGE_KEY = "noteDuration";
 export const DEFAULT_NOTE_DURATION = 0.45; // seconds
 export const NOTE_DURATION_MIN = 0.1;
 export const NOTE_DURATION_MAX = 1.5;
+
+export const STANDARD_TUNING_NOTES: Record<string, number> =
+  NOTE_OPTIONS.reduce(
+    (acc, note) => {
+      acc[note.name] = note.midi;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+// Guitar: 6 strings, standard tuning. Top = high E, bottom = low E (display order).
+export const GUITAR_STRING_ORDER = ["E4", "B3", "G3", "D3", "A2", "E2"] as const;
+export const GUITAR_OPEN_MIDI: Record<string, number> = {
+  E4: 64,
+  B3: 59,
+  G3: 55,
+  D3: 50,
+  A2: 45,
+  E2: 40,
+};
+export const PEG_CELL_COUNT = 61; // frets 0 (open) through 60

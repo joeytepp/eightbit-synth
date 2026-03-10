@@ -1,7 +1,7 @@
-import { useTrackContext } from "../../contexts/TrackContext";
+// import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function Footer() {
-  const { playSequence } = useTrackContext();
+  // const { playSequence } = useTrackContext();
 
   return (
     <div
@@ -12,7 +12,7 @@ export default function Footer() {
         alignItems: "center",
       }}
     >
-      <button onClick={() => playSequence()}>Play Sequence</button>
+      {/* <button onClick={() => playSequence()}>Play Sequence</button> */}
       <div
         style={{
           paddingTop: "1rem",
