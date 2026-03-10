@@ -1,8 +1,4 @@
-// import { useTrackContext } from "../../contexts/TrackContext";
-
 export default function Footer() {
-  // const { playSequence } = useTrackContext();
-
   return (
     <div
       style={{
@@ -12,7 +8,6 @@ export default function Footer() {
         alignItems: "center",
       }}
     >
-      {/* <button onClick={() => playSequence()}>Play Sequence</button> */}
       <div
         style={{
           paddingTop: "1rem",

@@ -38,8 +38,11 @@ const STORAGE_KEY = "synth-project-tracks";
 function loadTracksFromStorage(): TrackData[] | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+
     if (raw == null) return null;
+
     const parsed = JSON.parse(raw) as unknown;
+
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
     const valid = parsed.every(
       (t): t is TrackData =>
@@ -121,7 +124,13 @@ export function TrackProvider({ children }: { children: ReactNode }) {
 
   const [waveform, setWaveformState] = useState<WaveformType>(() => {
     const stored = localStorage.getItem(WAVEFORM_LOCAL_STORAGE_KEY);
-    if (stored !== "sine" && stored !== "triangle" && stored !== "square" && stored !== "sawtooth") return DEFAULT_WAVEFORM;
+    if (
+      stored !== "sine" &&
+      stored !== "triangle" &&
+      stored !== "square" &&
+      stored !== "sawtooth"
+    )
+      return DEFAULT_WAVEFORM;
     return stored;
   });
   const setWaveform = useCallback((value: WaveformType) => {
@@ -132,7 +141,9 @@ export function TrackProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(ATTACK_LOCAL_STORAGE_KEY);
     if (stored == null) return DEFAULT_ATTACK;
     const n = Number(stored);
-    return Number.isFinite(n) && n >= ATTACK_MIN && n <= ATTACK_MAX ? n : DEFAULT_ATTACK;
+    return Number.isFinite(n) && n >= ATTACK_MIN && n <= ATTACK_MAX
+      ? n
+      : DEFAULT_ATTACK;
   });
   const setAttack = useCallback((value: number) => {
     const clamped = Math.max(ATTACK_MIN, Math.min(ATTACK_MAX, value));
@@ -143,10 +154,17 @@ export function TrackProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(NOTE_DURATION_LOCAL_STORAGE_KEY);
     if (stored == null) return DEFAULT_NOTE_DURATION;
     const n = Number(stored);
-    return Number.isFinite(n) && n >= NOTE_DURATION_MIN && n <= NOTE_DURATION_MAX ? n : DEFAULT_NOTE_DURATION;
+    return Number.isFinite(n) &&
+      n >= NOTE_DURATION_MIN &&
+      n <= NOTE_DURATION_MAX
+      ? n
+      : DEFAULT_NOTE_DURATION;
   });
   const setNoteDuration = useCallback((value: number) => {
-    const clamped = Math.max(NOTE_DURATION_MIN, Math.min(NOTE_DURATION_MAX, value));
+    const clamped = Math.max(
+      NOTE_DURATION_MIN,
+      Math.min(NOTE_DURATION_MAX, value),
+    );
     setNoteDurationState(clamped);
   }, []);
 

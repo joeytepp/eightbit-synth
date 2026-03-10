@@ -10,7 +10,14 @@ export default function App() {
     <div>
       <TrackProvider>
         <ModalProvider>
-          <div style={{ padding: "2rem" }}>
+          <div
+            style={{
+              padding: "2rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "2rem",
+            }}
+          >
             <Header />
 
             <TrackList />

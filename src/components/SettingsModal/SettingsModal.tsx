@@ -10,6 +10,7 @@ import {
 } from "../../constants";
 
 export default function SettingsModal() {
+  // TODO: Implement using new context
   const {
     tempo,
     setTempo,
@@ -67,7 +68,9 @@ export default function SettingsModal() {
           value={attack}
           onChange={(e) => setAttack(Number(e.target.value))}
         />
-        <span style={{ marginLeft: "0.25rem", fontSize: "0.9em", color: "#666" }}>
+        <span
+          style={{ marginLeft: "0.25rem", fontSize: "0.9em", color: "#666" }}
+        >
           Softer onset when higher
         </span>
       </div>

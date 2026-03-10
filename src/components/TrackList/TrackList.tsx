@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
 import * as Tone from "tone";
-import { useTrackContext } from "../../contexts/TrackContext";
 // import Track from "../Track/Track";
 // import EmptyTrack from "../EmptyTrack/EmptyTrack";
 import TuningPeg from "../TuningPeg/TuningPeg";
@@ -21,22 +20,33 @@ const PEG_ROW_COUNT = PEG_ROW_ORDER.length;
 
 function parseFretValue(value: string): string {
   if (value === "" || value === "-") return "-";
+
   const digits = value.replace(/\D/g, "");
+
   if (digits === "") return "-";
+
   const num = parseInt(digits, 10);
-  if (Number.isNaN(num) || num < FRET_MIN) return "-";
-  if (num > FRET_MAX) return String(FRET_MAX);
+
+  if (Number.isNaN(num) || num < FRET_MIN) {
+    return "-";
+  }
+
+  if (num > FRET_MAX) {
+    return String(FRET_MAX);
+  }
+
   return String(num);
 }
 
 export default function TrackList() {
-  // const { tracks } = useTrackContext();
   const [lettersByPeg, setLettersByPeg] = useState<Record<string, string>>(
     () => {
       const initial: Record<string, string> = {};
+
       GUITAR_STRING_ORDER.forEach((note) => {
         initial[note] = note.slice(0, -1).toUpperCase();
       });
+
       return initial;
     },
   );
@@ -55,9 +65,11 @@ export default function TrackList() {
   const handlePegCellChangeWithValue = useCallback(
     (note: string, cellIndex: number, value: string) => {
       const parsed = parseFretValue(value);
+
       setPegCells((prev) => {
         const next = { ...prev };
         const row = [...(next[note] ?? Array(PEG_CELL_COUNT).fill("-"))];
+
         row[cellIndex] = parsed;
         next[note] = row;
         return next;
@@ -72,14 +84,16 @@ export default function TrackList() {
     const noteDuration = 0.2;
     const gap = 0.15;
     let scheduleTime = Tone.now();
+
     for (let fretIndex = 0; fretIndex < PEG_CELL_COUNT; fretIndex += 1) {
       const startTime = scheduleTime;
+
       PEG_ROW_ORDER.forEach((note) => {
         const openMidi = GUITAR_OPEN_MIDI[note];
         const row = pegCells[note] ?? [];
         const cellValue = row[fretIndex];
-        const fret =
-          cellValue !== "-" ? parseInt(cellValue, 10) : null;
+        const fret = cellValue !== "-" ? parseInt(cellValue, 10) : null;
+
         if (
           fret !== null &&
           !Number.isNaN(fret) &&
@@ -88,6 +102,7 @@ export default function TrackList() {
         ) {
           const noteMidi = openMidi + fret;
           const freq = Tone.Frequency(noteMidi, "midi").toFrequency();
+
           synth.triggerAttackRelease(freq, noteDuration, startTime);
         }
       });
@@ -159,7 +174,7 @@ export default function TrackList() {
         }}
       >
         <button type="button" onClick={playAllNotes}>
-          Play all notes
+          ▶️ Play
         </button>
       </div>
       <div id="tuning-pegs">
@@ -189,10 +204,6 @@ export default function TrackList() {
           />
         ))}
       </div>
-      {/* {tracks.map((t, index) => (
-        <Track key={t.id} trackId={t.id} index={index} />
-      ))}
-      <EmptyTrack /> */}
     </div>
   );
 }

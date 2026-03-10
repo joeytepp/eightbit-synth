@@ -1,12 +1,13 @@
 import React from "react";
 import ShareModal from "../ShareModal/ShareModal";
 import { useModal } from "../../contexts/ModalContext";
-import { useTrackContext } from "../../contexts/TrackContext";
 import SettingsModal from "../SettingsModal/SettingsModal";
 
 export default function Header() {
   const { openModal } = useModal();
-  const { title, artist, resetContext } = useTrackContext();
+
+  // TODO: Implement reset context
+  const noop = () => {};
 
   return (
     <div
@@ -24,12 +25,7 @@ export default function Header() {
           gap: "0.5rem",
         }}
       >
-        {title && artist && (
-          <p style={{ margin: 0, color: "AccentColor" }}>
-            "{title}" by {artist}
-          </p>
-        )}
-        <button type="button" onClick={resetContext} title="Reset project">
+        <button type="button" onClick={noop} title="Reset project">
           Reset
         </button>
       </div>
