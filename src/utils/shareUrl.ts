@@ -26,26 +26,6 @@ const sqids = new Sqids();
 const challengeSqids = new Sqids(); // separate instance to avoid alphabet collision with share payloads
 
 /**
- * Encode a share payload to a sqids string (JSON → UTF-8 → 32-bit numbers → sqids).
- */
-export function (payload: SharePayload): string {
-  const json = JSON.stringify(payload);
-  const bytes = new TextEncoder().encode(json);
-  const byteLength = bytes.length;
-  const paddedLength = Math.ceil((byteLength + 4) / 4) * 4; // +4 for length prefix, align to 4
-  const buffer = new ArrayBuffer(paddedLength);
-  const view = new DataView(buffer);
-
-  view.setUint32(0, byteLength, true);
-
-  new Uint8Array(buffer).set(bytes, 4);
-
-  const numbers = Array.from(new Uint32Array(buffer));
-
-  return sqids.encode(numbers);
-}
-
-/**
  * Decode a sqids string to a share payload, or null if invalid.
  */
 export function decodeSharePayload(sqid: string): SharePayload | null {
