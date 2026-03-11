@@ -5,7 +5,6 @@ import { useModal } from "../../contexts/ModalContext";
 import { usePegContext } from "../../contexts/PegContext";
 import {
   decodeSharePayload,
-  encodeSharePayload,
   encodeChallengePayload,
   buildChallengeUrl,
 } from "../../utils/shareUrl";
@@ -13,8 +12,7 @@ import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function ShareModal() {
   const { closeModal } = useModal();
-  const { tracks, title, artist, tempo, setTitle, setArtist } =
-    useTrackContext();
+  const { title, artist, tempo, setTitle, setArtist } = useTrackContext();
   const { lettersByPeg, pegCells } = usePegContext();
   const dataLoadedRef = useRef(false);
   const [challengeCopied, setChallengeCopied] = useState(false);

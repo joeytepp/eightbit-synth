@@ -28,7 +28,7 @@ const challengeSqids = new Sqids(); // separate instance to avoid alphabet colli
 /**
  * Encode a share payload to a sqids string (JSON → UTF-8 → 32-bit numbers → sqids).
  */
-export function encodeSharePayload(payload: SharePayload): string {
+export function (payload: SharePayload): string {
   const json = JSON.stringify(payload);
   const bytes = new TextEncoder().encode(json);
   const byteLength = bytes.length;
