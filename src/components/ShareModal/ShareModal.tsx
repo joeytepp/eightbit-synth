@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
-import { decodeSharePayload, encodeSharePayload } from "../../utils/shareUrl";
+import { usePegContext } from "../../contexts/PegContext";
+import {
+  decodeSharePayload,
+  encodeSharePayload,
+  encodeChallengePayload,
+  buildChallengeUrl,
+} from "../../utils/shareUrl";
 import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function ShareModal() {
   const { closeModal } = useModal();
-  const { tracks, title, artist, setTitle, setArtist } = useTrackContext();
+  const { tracks, title, artist, tempo, setTitle, setArtist } =
+    useTrackContext();
+  const { lettersByPeg, pegCells } = usePegContext();
   const dataLoadedRef = useRef(false);
+  const [challengeCopied, setChallengeCopied] = useState(false);
 
   useEffect(() => {
     if (dataLoadedRef.current) return;
@@ -22,6 +31,23 @@ export default function ShareModal() {
       setArtist(payload.artist);
     }
   }, [setTitle, setArtist]);
+
+  const handleCopyChallengeUrl = async () => {
+    const payload = {
+      lettersByPeg,
+      pegCells,
+      ...(title ? { title } : undefined),
+      ...(artist ? { artist } : undefined),
+      ...(tempo >= 1 && tempo <= 300 ? { tempo } : undefined),
+    };
+    const encoded = encodeChallengePayload(payload);
+    const url = buildChallengeUrl(encoded);
+
+    await navigator.clipboard.writeText(url);
+
+    setChallengeCopied(true);
+    setTimeout(() => setChallengeCopied(false), 2000);
+  };
 
   return (
     <>
@@ -49,63 +75,65 @@ export default function ShareModal() {
             alignItems: "center",
           }}
         >
-          <h2>Share Song</h2>
+          <h2>Share</h2>
           <button onClick={() => closeModal()}>X</button>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div>
-            <label htmlFor="song-title">Title: </label>
+          <section>
+            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+              Share song (title & artist)
+            </h3>
             <div>
-              <input
-                type="text"
-                id="song-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+              <label htmlFor="song-title">Title: </label>
+              <div>
+                <input
+                  required
+                  type="text"
+                  id="song-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <label htmlFor="song-artist">Artist: </label>
+          </section>
+          <section>
             <div>
-              <input
-                type="text"
-                id="song-artist"
-                value={artist}
-                onChange={(e) => setArtist(e.target.value)}
-              />
+              <label htmlFor="song-artist">Artist: </label>
+              <div>
+                <input
+                  required
+                  type="text"
+                  id="song-artist"
+                  value={artist}
+                  onChange={(e) => setArtist(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "1rem",
-            }}
-          >
-            <button onClick={() => closeModal()}>Cancel</button>
-            <button
-              disabled={!title || !artist}
-              onClick={async () => {
-                const shareUrl = encodeSharePayload({
-                  title,
-                  artist,
-                  tracks: tracks,
-                });
-
-                await new Promise((resolve) => {
-                  navigator.clipboard.writeText(
-                    window.location.origin + "/" + shareUrl,
-                  );
-                  setTimeout(resolve, 1000);
-                });
-
-                window.location.href = shareUrl;
-                window.alert("Copied to clipboard");
+          </section>
+          <section>
+            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+              Send challenge to friends
+            </h3>
+            <p
+              style={{
+                fontSize: "0.9rem",
+                color: "#666",
+                marginBottom: "0.5rem",
               }}
             >
-              Share
+              Copy a link that contains the current tab and optional title/tempo
+            </p>
+            <button
+              disabled={!title || !artist}
+              type="button"
+              onClick={handleCopyChallengeUrl}
+              style={{ marginBottom: "1rem" }}
+            >
+              {challengeCopied ? "Copied!" : "Copy challenge URL"}
             </button>
-          </div>
+          </section>
+
+          <hr style={{ border: "none", borderTop: "1px solid #eee" }} />
         </div>
       </div>
     </>

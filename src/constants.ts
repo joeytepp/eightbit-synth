@@ -98,3 +98,5 @@ export const GUITAR_OPEN_MIDI: Record<string, number> = {
   E2: 40,
 };
 export const PEG_CELL_COUNT = 61; // frets 0 (open) through 60
+export const PEG_LETTERS_STORAGE_KEY = "synth-project-peg-letters";
+export const PEG_CELLS_STORAGE_KEY = "synth-project-peg-cells";

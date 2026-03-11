@@ -1,37 +1,27 @@
 import React, { useCallback, useLayoutEffect, useState } from "react";
 import Cell from "../Cell/Cell";
 import { PEG_CELL_COUNT } from "../../constants";
+import { usePegString } from "../../contexts/PegContext";
 
 const ALLOWED_LETTERS = "ABCDEF";
 
-type TuningPegProps = {
+interface TuningPegProps {
   note: string;
-  letter: string;
-  onChangeLetter: (letter: string) => void;
-  onCellChange: (cellIndex: number, value: string) => void;
-  onCellKeyDown: (
-    cellIndex: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => void;
-  onCellFocus: (cellIndex: number) => void;
-  onCellBlur: (cellIndex: number) => void;
-  cells: Record<string, string[]>;
-  focusedCell: string | null;
-  registerCellRef?: (cellKey: string, el: HTMLInputElement | null) => void;
-};
+}
 
-export default function TuningPeg({
-  note,
-  letter,
-  onChangeLetter,
-  onCellChange,
-  onCellKeyDown,
-  onCellFocus,
-  onCellBlur,
-  cells,
-  focusedCell,
-  registerCellRef,
-}: TuningPegProps) {
+export default function TuningPeg({ note }: TuningPegProps) {
+  const {
+    letter,
+    cells,
+    setLetter,
+    onCellChange,
+    onCellKeyDown,
+    onCellFocus,
+    onCellBlur,
+    focusedCell,
+    registerCellRef,
+  } = usePegString(note);
+
   const [numBars, setNumbars] = useState(PEG_CELL_COUNT);
 
   const handlePegLetterChange = useCallback(
@@ -40,10 +30,10 @@ export default function TuningPeg({
       const upper = raw.toUpperCase();
       const last = upper.slice(-1);
       if (last === "" || ALLOWED_LETTERS.includes(last)) {
-        onChangeLetter(last);
+        setLetter(last);
       }
     },
-    [onChangeLetter],
+    [setLetter],
   );
 
   const handlePegKeyDown = useCallback(
@@ -88,7 +78,7 @@ export default function TuningPeg({
               key={i}
               cellKey={cellKey}
               cellIndex={i}
-              value={cells[note]?.[i] ?? "-"}
+              value={cells[i] ?? "-"}
               onChange={onCellChange}
               onKeyDown={onCellKeyDown}
               onFocus={onCellFocus}

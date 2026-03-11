@@ -44,8 +44,10 @@ export default function Header() {
         </div>
       </div>
       <div style={{ display: "flex", gap: "1rem" }}>
-        <button onClick={() => openModal(<SettingsModal />)}>Settings</button>
-        <button onClick={() => openModal(<ShareModal />)}>Share</button>
+        <button onClick={() => openModal(<SettingsModal />)}>
+          ⚙️ Settings
+        </button>
+        <button onClick={() => openModal(<ShareModal />)}>🎉 Challenge</button>
       </div>
     </div>
   );
