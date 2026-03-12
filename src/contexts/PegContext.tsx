@@ -14,6 +14,8 @@ import {
   PEG_CELL_COUNT,
   PEG_LETTERS_STORAGE_KEY,
   PEG_CELLS_STORAGE_KEY,
+  noteLetterToMidi,
+  octaveFromStringKey,
 } from "../constants";
 
 const ALLOWED_CELL_CHARS = "0123456789-";
@@ -250,7 +252,10 @@ export function PegProvider({ children }: { children: ReactNode }) {
       const startTime = scheduleTime;
 
       PEG_ROW_ORDER.forEach((note) => {
-        const openMidi = GUITAR_OPEN_MIDI[note];
+        const letter = lettersByPeg[note] ?? note.slice(0, -1);
+        const octave = octaveFromStringKey(note);
+        const openMidi =
+          noteLetterToMidi(letter, octave) ?? GUITAR_OPEN_MIDI[note];
         const row = pegCells[note] ?? [];
         const cellValue = row[fretIndex];
         const fret = cellValue !== "-" ? parseInt(cellValue, 10) : null;
@@ -269,7 +274,7 @@ export function PegProvider({ children }: { children: ReactNode }) {
       });
       scheduleTime += noteDuration + gap;
     }
-  }, [pegCells]);
+  }, [pegCells, lettersByPeg]);
 
   const resetPegContext = useCallback(() => {
     setLettersByPegState(getInitialLetters());

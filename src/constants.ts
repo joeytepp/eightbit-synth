@@ -100,3 +100,23 @@ export const GUITAR_OPEN_MIDI: Record<string, number> = {
 export const PEG_CELL_COUNT = 61; // frets 0 (open) through 60
 export const PEG_LETTERS_STORAGE_KEY = "synth-project-peg-letters";
 export const PEG_CELLS_STORAGE_KEY = "synth-project-peg-cells";
+
+const SEMITONE_MAP: Record<string, number> = {
+  C: 0, "C#": 1, Db: 1,
+  D: 2, "D#": 3, Eb: 3,
+  E: 4, Fb: 4,
+  F: 5, "E#": 5, "F#": 6, Gb: 6,
+  G: 7, "G#": 8, Ab: 8,
+  A: 9, "A#": 10, Bb: 10,
+  B: 11, Cb: 11,
+};
+
+export function noteLetterToMidi(letter: string, octave: number): number | null {
+  const semi = SEMITONE_MAP[letter] ?? SEMITONE_MAP[letter.toUpperCase()];
+  if (semi === undefined) return null;
+  return 12 * (octave + 1) + semi;
+}
+
+export function octaveFromStringKey(key: string): number {
+  return parseInt(key.slice(-1), 10);
+}

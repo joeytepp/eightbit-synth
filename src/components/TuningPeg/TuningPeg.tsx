@@ -3,7 +3,7 @@ import Cell from "../Cell/Cell";
 import { PEG_CELL_COUNT } from "../../constants";
 import { usePegString } from "../../contexts/PegContext";
 
-const ALLOWED_LETTERS = "ABCDEF";
+const ALLOWED_LETTERS = "ABCDEFG";
 
 interface TuningPegProps {
   note: string;
