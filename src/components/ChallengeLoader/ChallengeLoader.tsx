@@ -35,7 +35,6 @@ export default function ChallengeLoader() {
       setTempo(payload.tempo);
     }
     window.localStorage.setItem("challenge-payload", JSON.stringify(payload));
-    window.history.replaceState({}, "", window.location.pathname || "/");
 
     setChallengeAnswers(payload.title ?? "", payload.artist ?? "");
     openModal(<ChallengeModal />);

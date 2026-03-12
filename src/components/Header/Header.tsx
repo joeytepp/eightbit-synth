@@ -2,12 +2,12 @@ import React from "react";
 import ShareModal from "../ShareModal/ShareModal";
 import { useModal } from "../../contexts/ModalContext";
 import SettingsModal from "../SettingsModal/SettingsModal";
+import { usePegContext } from "../../contexts/PegContext";
 
 export default function Header() {
   const { openModal } = useModal();
 
-  // TODO: Implement reset context
-  const noop = () => {};
+  const { resetPegContext } = usePegContext();
 
   return (
     <div
@@ -25,7 +25,16 @@ export default function Header() {
           gap: "0.5rem",
         }}
       >
-        <button type="button" onClick={noop} title="Reset project">
+        <button
+          type="button"
+          onClick={() => {
+            const confirmed = window.confirm("Are you sure you want to reset?");
+            if (!confirmed) return;
+
+            resetPegContext();
+          }}
+          title="Reset context"
+        >
           Reset
         </button>
       </div>

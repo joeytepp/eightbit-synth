@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from "react";
+import React, { useCallback } from "react";
 import Cell from "../Cell/Cell";
 import { PEG_CELL_COUNT } from "../../constants";
 import { usePegString } from "../../contexts/PegContext";
@@ -22,8 +22,6 @@ export default function TuningPeg({ note }: TuningPegProps) {
     registerCellRef,
   } = usePegString(note);
 
-  const [numBars, setNumbars] = useState(PEG_CELL_COUNT);
-
   const handlePegLetterChange = useCallback(
     (pegKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
@@ -45,10 +43,6 @@ export default function TuningPeg({ note }: TuningPegProps) {
     },
     [],
   );
-
-  useLayoutEffect(() => {
-    setNumbars(parseInt(String(Math.floor(document.body.offsetWidth / 360.0))));
-  }, [numBars]);
 
   return (
     <div

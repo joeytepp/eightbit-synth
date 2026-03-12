@@ -217,7 +217,6 @@ export function TrackProvider({ children }: { children: ReactNode }) {
     if (payload) {
       setTitle(payload.title);
       setArtist(payload.artist);
-      window.history.replaceState({}, "", "/");
     }
   }, [setTitle, setArtist]);
 

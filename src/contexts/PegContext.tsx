@@ -39,7 +39,7 @@ function parseFretValue(value: string): string {
   }
 
   if (num > FRET_MAX) {
-    return String(FRET_MAX);
+    return String(Math.floor(num / 10));
   }
 
   return String(num);
@@ -278,10 +278,7 @@ export function PegProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyChallengePayload = useCallback(
-    (
-      letters: Record<string, string>,
-      cells: Record<string, string[]>,
-    ) => {
+    (letters: Record<string, string>, cells: Record<string, string[]>) => {
       const safeLetters: Record<string, string> = {};
       const safeCells: Record<string, string[]> = {};
       GUITAR_STRING_ORDER.forEach((note) => {
@@ -325,9 +322,7 @@ export function PegProvider({ children }: { children: ReactNode }) {
     applyChallengePayload,
   };
 
-  return (
-    <PegContext.Provider value={value}>{children}</PegContext.Provider>
-  );
+  return <PegContext.Provider value={value}>{children}</PegContext.Provider>;
 }
 
 export function usePegContext(): PegContextValue {
