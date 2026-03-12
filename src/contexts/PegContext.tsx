@@ -116,6 +116,7 @@ export interface PegContextValue {
   lettersByPeg: Record<string, string>;
   pegCells: Record<string, string[]>;
   focusedPegCell: string | null;
+  isPlaying: boolean;
   setLetter: (note: string, letter: string) => void;
   setPegCell: (note: string, cellIndex: number, value: string) => void;
   handlePegCellKeyDown: (
@@ -126,6 +127,7 @@ export interface PegContextValue {
   setFocusedPegCell: (key: string | null) => void;
   registerCellRef: (cellKey: string, el: HTMLInputElement | null) => void;
   playAllNotes: () => Promise<void>;
+  stopPlayback: () => void;
   resetPegContext: () => void;
   /** Apply challenge payload from URL (letters + cells). Clears focus. */
   applyChallengePayload: (
@@ -161,7 +163,10 @@ export function PegProvider({ children }: { children: ReactNode }) {
   );
 
   const [focusedPegCell, setFocusedPegCell] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const pegCellRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const activeSynthRef = useRef<Tone.PolySynth | null>(null);
+  const playTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setLetter = useCallback((note: string, letter: string) => {
     setLettersByPegState((prev) => ({ ...prev, [note]: letter }));
@@ -241,12 +246,30 @@ export function PegProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const stopPlayback = useCallback(() => {
+    if (activeSynthRef.current) {
+      activeSynthRef.current.releaseAll();
+      activeSynthRef.current.dispose();
+      activeSynthRef.current = null;
+    }
+    if (playTimeoutRef.current) {
+      clearTimeout(playTimeoutRef.current);
+      playTimeoutRef.current = null;
+    }
+    setIsPlaying(false);
+  }, []);
+
   const playAllNotes = useCallback(async () => {
+    stopPlayback();
     await Tone.start();
     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    activeSynthRef.current = synth;
+    setIsPlaying(true);
+
     const noteDuration = 0.2;
     const gap = 0.15;
     let scheduleTime = Tone.now();
+    let lastNoteTime = scheduleTime;
 
     for (let fretIndex = 0; fretIndex < PEG_CELL_COUNT; fretIndex += 1) {
       const startTime = scheduleTime;
@@ -268,13 +291,20 @@ export function PegProvider({ children }: { children: ReactNode }) {
         ) {
           const noteMidi = openMidi + fret;
           const freq = Tone.Frequency(noteMidi, "midi").toFrequency();
-
           synth.triggerAttackRelease(freq, noteDuration, startTime);
+          lastNoteTime = startTime + noteDuration;
         }
       });
       scheduleTime += noteDuration + gap;
     }
-  }, [pegCells, lettersByPeg]);
+
+    const remainingMs = Math.max(0, (lastNoteTime - Tone.now()) * 1000) + 100;
+    playTimeoutRef.current = setTimeout(() => {
+      activeSynthRef.current?.dispose();
+      activeSynthRef.current = null;
+      setIsPlaying(false);
+    }, remainingMs);
+  }, [pegCells, lettersByPeg, stopPlayback]);
 
   const resetPegContext = useCallback(() => {
     setLettersByPegState(getInitialLetters());
@@ -317,12 +347,14 @@ export function PegProvider({ children }: { children: ReactNode }) {
     lettersByPeg,
     pegCells,
     focusedPegCell,
+    isPlaying,
     setLetter,
     setPegCell,
     handlePegCellKeyDown,
     setFocusedPegCell,
     registerCellRef,
     playAllNotes,
+    stopPlayback,
     resetPegContext,
     applyChallengePayload,
   };

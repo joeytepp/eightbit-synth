@@ -4,7 +4,7 @@ import { GUITAR_STRING_ORDER } from "../../constants";
 import { usePegContext } from "../../contexts/PegContext";
 
 export default function TrackList() {
-  const { playAllNotes } = usePegContext();
+  const { playAllNotes, stopPlayback, isPlaying } = usePegContext();
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -12,13 +12,18 @@ export default function TrackList() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "1rem",
+          gap: "0.5rem",
           marginBottom: "0.5rem",
         }}
       >
         <button type="button" onClick={playAllNotes}>
           ▶️ Play
         </button>
+        {isPlaying && (
+          <button type="button" onClick={stopPlayback}>
+            ⏹️ Stop
+          </button>
+        )}
       </div>
       <div id="tuning-pegs">
         {GUITAR_STRING_ORDER.map((note) => (
