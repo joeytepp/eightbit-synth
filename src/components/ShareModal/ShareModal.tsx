@@ -1,34 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
 import { usePegContext } from "../../contexts/PegContext";
+import { useChallengeContext } from "../../contexts/ChallengeContext";
 import {
-  decodeSharePayload,
   encodeChallengePayload,
   buildChallengeUrl,
 } from "../../utils/shareUrl";
-import { useTrackContext } from "../../contexts/TrackContext";
 
 export default function ShareModal() {
   const { closeModal } = useModal();
-  const { title, artist, tempo, setTitle, setArtist } = useTrackContext();
-  const { lettersByPeg, pegCells } = usePegContext();
-  const dataLoadedRef = useRef(false);
+  const { title, artist, setTitle, setArtist } = useChallengeContext();
+  const { lettersByPeg, pegCells, tempo } = usePegContext();
   const [challengeCopied, setChallengeCopied] = useState(false);
-
-  useEffect(() => {
-    if (dataLoadedRef.current) return;
-    dataLoadedRef.current = true;
-
-    const payload = decodeSharePayload(
-      window.location.href.split("/").pop() || "",
-    );
-    if (payload) {
-      setTitle(payload.title);
-      setArtist(payload.artist);
-    }
-  }, [setTitle, setArtist]);
 
   const handleCopyChallengeUrl = async () => {
     const payload = {

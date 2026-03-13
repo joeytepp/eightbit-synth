@@ -1,5 +1,5 @@
 import React from "react";
-import { useTrackContext } from "../../contexts/TrackContext";
+import { usePegContext } from "../../contexts/PegContext";
 import {
   type WaveformType,
   WAVEFORM_OPTIONS,
@@ -10,7 +10,6 @@ import {
 } from "../../constants";
 
 export default function SettingsModal() {
-  // TODO: Implement using new context
   const {
     tempo,
     setTempo,
@@ -20,7 +19,7 @@ export default function SettingsModal() {
     setAttack,
     noteDuration,
     setNoteDuration,
-  } = useTrackContext();
+  } = usePegContext();
 
   return (
     <div
@@ -37,10 +36,8 @@ export default function SettingsModal() {
         <input
           type="number"
           id="tempo"
-          min={1}
-          max={300}
           value={tempo}
-          onChange={(e) => setTempo(Number(e.target.value))}
+          onChange={(e) => setTempo(Math.max(1, Number(e.target.value)))}
         />
       </div>
       <div>

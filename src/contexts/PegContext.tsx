@@ -16,6 +16,19 @@ import {
   PEG_CELLS_STORAGE_KEY,
   noteLetterToMidi,
   octaveFromStringKey,
+  TEMPO_LOCAL_STORAGE_KEY,
+  DEFAULT_TEMPO,
+  type WaveformType,
+  WAVEFORM_LOCAL_STORAGE_KEY,
+  DEFAULT_WAVEFORM,
+  ATTACK_LOCAL_STORAGE_KEY,
+  DEFAULT_ATTACK,
+  ATTACK_MIN,
+  ATTACK_MAX,
+  NOTE_DURATION_LOCAL_STORAGE_KEY,
+  DEFAULT_NOTE_DURATION,
+  NOTE_DURATION_MIN,
+  NOTE_DURATION_MAX,
 } from "../constants";
 
 const ALLOWED_CELL_CHARS = "0123456789-";
@@ -117,6 +130,10 @@ export interface PegContextValue {
   pegCells: Record<string, string[]>;
   focusedPegCell: string | null;
   isPlaying: boolean;
+  tempo: number;
+  waveform: WaveformType;
+  attack: number;
+  noteDuration: number;
   setLetter: (note: string, letter: string) => void;
   setPegCell: (note: string, cellIndex: number, value: string) => void;
   handlePegCellKeyDown: (
@@ -126,6 +143,10 @@ export interface PegContextValue {
   ) => void;
   setFocusedPegCell: (key: string | null) => void;
   registerCellRef: (cellKey: string, el: HTMLInputElement | null) => void;
+  setTempo: (tempo: number) => void;
+  setWaveform: (waveform: WaveformType) => void;
+  setAttack: (attack: number) => void;
+  setNoteDuration: (noteDuration: number) => void;
   playAllNotes: () => Promise<void>;
   stopPlayback: () => void;
   resetPegContext: () => void;
@@ -167,6 +188,57 @@ export function PegProvider({ children }: { children: ReactNode }) {
   const pegCellRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const activeSynthRef = useRef<Tone.PolySynth | null>(null);
   const playTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [tempo, setTempoState] = useState(() => {
+    const stored = localStorage.getItem(TEMPO_LOCAL_STORAGE_KEY);
+    if (stored == null) return DEFAULT_TEMPO;
+    const n = Number(stored);
+    return Number.isFinite(n) && n > 0 && n <= 300 ? n : DEFAULT_TEMPO;
+  });
+  const setTempo = useCallback((value: number) => {
+    setTempoState(Math.max(1, Math.min(300, Math.round(value))));
+  }, []);
+
+  const [waveform, setWaveformState] = useState<WaveformType>(() => {
+    const stored = localStorage.getItem(WAVEFORM_LOCAL_STORAGE_KEY);
+    if (
+      stored !== "sine" &&
+      stored !== "triangle" &&
+      stored !== "square" &&
+      stored !== "sawtooth"
+    )
+      return DEFAULT_WAVEFORM;
+    return stored;
+  });
+  const setWaveform = useCallback((value: WaveformType) => {
+    setWaveformState(value);
+  }, []);
+
+  const [attack, setAttackState] = useState(() => {
+    const stored = localStorage.getItem(ATTACK_LOCAL_STORAGE_KEY);
+    if (stored == null) return DEFAULT_ATTACK;
+    const n = Number(stored);
+    return Number.isFinite(n) && n >= ATTACK_MIN && n <= ATTACK_MAX
+      ? n
+      : DEFAULT_ATTACK;
+  });
+  const setAttack = useCallback((value: number) => {
+    setAttackState(Math.max(ATTACK_MIN, Math.min(ATTACK_MAX, value)));
+  }, []);
+
+  const [noteDuration, setNoteDurationState] = useState(() => {
+    const stored = localStorage.getItem(NOTE_DURATION_LOCAL_STORAGE_KEY);
+    if (stored == null) return DEFAULT_NOTE_DURATION;
+    const n = Number(stored);
+    return Number.isFinite(n) && n >= NOTE_DURATION_MIN && n <= NOTE_DURATION_MAX
+      ? n
+      : DEFAULT_NOTE_DURATION;
+  });
+  const setNoteDuration = useCallback((value: number) => {
+    setNoteDurationState(
+      Math.max(NOTE_DURATION_MIN, Math.min(NOTE_DURATION_MAX, value)),
+    );
+  }, []);
 
   const setLetter = useCallback((note: string, letter: string) => {
     setLettersByPegState((prev) => ({ ...prev, [note]: letter }));
@@ -262,19 +334,21 @@ export function PegProvider({ children }: { children: ReactNode }) {
   const playAllNotes = useCallback(async () => {
     stopPlayback();
     await Tone.start();
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: waveform },
+      envelope: { attack },
+    }).toDestination();
     activeSynthRef.current = synth;
     setIsPlaying(true);
 
-    const noteDuration = 0.2;
-    const gap = 0.15;
+    const beatDuration = 60 / tempo;
     let scheduleTime = Tone.now();
     let lastNoteTime = scheduleTime;
 
     for (let fretIndex = 0; fretIndex < PEG_CELL_COUNT; fretIndex += 1) {
       const startTime = scheduleTime;
 
-      PEG_ROW_ORDER.forEach((note) => {
+      for (const note of PEG_ROW_ORDER) {
         const letter = lettersByPeg[note] ?? note.slice(0, -1);
         const octave = octaveFromStringKey(note);
         const openMidi =
@@ -294,8 +368,8 @@ export function PegProvider({ children }: { children: ReactNode }) {
           synth.triggerAttackRelease(freq, noteDuration, startTime);
           lastNoteTime = startTime + noteDuration;
         }
-      });
-      scheduleTime += noteDuration + gap;
+      }
+      scheduleTime += beatDuration;
     }
 
     const remainingMs = Math.max(0, (lastNoteTime - Tone.now()) * 1000) + 100;
@@ -304,12 +378,16 @@ export function PegProvider({ children }: { children: ReactNode }) {
       activeSynthRef.current = null;
       setIsPlaying(false);
     }, remainingMs);
-  }, [pegCells, lettersByPeg, stopPlayback]);
+  }, [pegCells, lettersByPeg, stopPlayback, tempo, waveform, attack, noteDuration]);
 
   const resetPegContext = useCallback(() => {
     setLettersByPegState(getInitialLetters());
     setPegCellsState(getInitialCells());
     setFocusedPegCell(null);
+    setTempoState(DEFAULT_TEMPO);
+    setWaveformState(DEFAULT_WAVEFORM);
+    setAttackState(DEFAULT_ATTACK);
+    setNoteDurationState(DEFAULT_NOTE_DURATION);
   }, []);
 
   const applyChallengePayload = useCallback(
@@ -343,16 +421,40 @@ export function PegProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(PEG_CELLS_STORAGE_KEY, JSON.stringify(pegCells));
   }, [pegCells]);
 
+  useEffect(() => {
+    localStorage.setItem(TEMPO_LOCAL_STORAGE_KEY, String(tempo));
+  }, [tempo]);
+
+  useEffect(() => {
+    localStorage.setItem(WAVEFORM_LOCAL_STORAGE_KEY, waveform);
+  }, [waveform]);
+
+  useEffect(() => {
+    localStorage.setItem(ATTACK_LOCAL_STORAGE_KEY, String(attack));
+  }, [attack]);
+
+  useEffect(() => {
+    localStorage.setItem(NOTE_DURATION_LOCAL_STORAGE_KEY, String(noteDuration));
+  }, [noteDuration]);
+
   const value: PegContextValue = {
     lettersByPeg,
     pegCells,
     focusedPegCell,
     isPlaying,
+    tempo,
+    waveform,
+    attack,
+    noteDuration,
     setLetter,
     setPegCell,
     handlePegCellKeyDown,
     setFocusedPegCell,
     registerCellRef,
+    setTempo,
+    setWaveform,
+    setAttack,
+    setNoteDuration,
     playAllNotes,
     stopPlayback,
     resetPegContext,

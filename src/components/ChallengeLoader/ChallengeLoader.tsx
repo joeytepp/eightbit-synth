@@ -4,7 +4,6 @@ import {
   decodeChallengePayload,
 } from "../../utils/shareUrl";
 import { usePegContext } from "../../contexts/PegContext";
-import { useTrackContext } from "../../contexts/TrackContext";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
 import { useModal } from "../../contexts/ModalContext";
 import ChallengeModal from "../ChallengeModal/ChallengeModal";
@@ -15,8 +14,7 @@ import ChallengeModal from "../ChallengeModal/ChallengeModal";
  * and opens the ChallengeModal for the friend to guess title/artist.
  */
 export default function ChallengeLoader() {
-  const { applyChallengePayload } = usePegContext();
-  const { setTempo } = useTrackContext();
+  const { applyChallengePayload, setTempo } = usePegContext();
   const { setChallengeAnswers } = useChallengeContext();
   const { openModal } = useModal();
   const appliedRef = useRef(false);

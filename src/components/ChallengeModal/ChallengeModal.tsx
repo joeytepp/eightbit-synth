@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
-import { useTrackContext } from "../../contexts/TrackContext";
 import { useModal } from "../../contexts/ModalContext";
 import { hammingDistance } from "../../utils/shareUrl";
 import { usePegContext } from "../../contexts/PegContext";
@@ -13,8 +12,8 @@ interface Feedback {
 }
 
 export default function ChallengeModal() {
-  const { challengeAnswers, clearChallenge } = useChallengeContext();
-  const { setTitle, setArtist } = useTrackContext();
+  const { challengeAnswers, clearChallenge, setTitle, setArtist } =
+    useChallengeContext();
   const { closeModal } = useModal();
 
   const [titleGuess, setTitleGuess] = useState("");

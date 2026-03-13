@@ -4,29 +4,9 @@ import React, {
   useState,
   useCallback,
   useEffect,
-  useRef,
-  ReactNode,
+  type ReactNode,
 } from "react";
-import * as Tone from "tone";
-import {
-  INITIAL_NOTE_VALUES,
-  ARTIST_LOCAL_STORAGE_KEY,
-  TITLE_LOCAL_STORAGE_KEY,
-  TEMPO_LOCAL_STORAGE_KEY,
-  DEFAULT_TEMPO,
-  type WaveformType,
-  WAVEFORM_LOCAL_STORAGE_KEY,
-  DEFAULT_WAVEFORM,
-  ATTACK_LOCAL_STORAGE_KEY,
-  DEFAULT_ATTACK,
-  ATTACK_MIN,
-  ATTACK_MAX,
-  NOTE_DURATION_LOCAL_STORAGE_KEY,
-  DEFAULT_NOTE_DURATION,
-  NOTE_DURATION_MIN,
-  NOTE_DURATION_MAX,
-} from "../constants";
-import { decodeSharePayload } from "../utils/shareUrl";
+import { INITIAL_NOTE_VALUES } from "../constants";
 
 export interface TrackData {
   id: string;
@@ -60,24 +40,11 @@ function loadTracksFromStorage(): TrackData[] | null {
 
 export interface TrackContextValue {
   tracks: TrackData[];
-  title: string;
-  artist: string;
-  tempo: number;
-  waveform: WaveformType;
-  attack: number;
-  noteDuration: number;
-  setTitle: (title: string) => void;
-  setArtist: (artist: string) => void;
-  setTempo: (tempo: number) => void;
-  setWaveform: (waveform: WaveformType) => void;
-  setAttack: (attack: number) => void;
-  setNoteDuration: (noteDuration: number) => void;
   addTrack: () => void;
   removeTrack: (id: string) => void;
   addNote: (trackId: string) => void;
   removeNote: (trackId: string, index: number) => void;
   changeNote: (trackId: string, index: number, newMidi: number) => void;
-  playSequence: () => Promise<void>;
   resetContext: () => void;
 }
 
@@ -103,151 +70,13 @@ export function TrackProvider({ children }: { children: ReactNode }) {
     return stored ?? [createInitialTrack()];
   });
 
-  const [title, setTitle] = useState(() => {
-    return localStorage.getItem(TITLE_LOCAL_STORAGE_KEY) ?? "";
-  });
-  const [artist, setArtist] = useState(() => {
-    return localStorage.getItem(ARTIST_LOCAL_STORAGE_KEY) ?? "";
-  });
-
-  const [tempo, setTempoState] = useState(() => {
-    const stored = localStorage.getItem(TEMPO_LOCAL_STORAGE_KEY);
-    if (stored == null) return DEFAULT_TEMPO;
-    const n = Number(stored);
-    return Number.isFinite(n) && n > 0 && n <= 300 ? n : DEFAULT_TEMPO;
-  });
-
-  const setTempo = useCallback((value: number) => {
-    const clamped = Math.max(1, Math.min(300, Math.round(value)));
-    setTempoState(clamped);
-  }, []);
-
-  const [waveform, setWaveformState] = useState<WaveformType>(() => {
-    const stored = localStorage.getItem(WAVEFORM_LOCAL_STORAGE_KEY);
-    if (
-      stored !== "sine" &&
-      stored !== "triangle" &&
-      stored !== "square" &&
-      stored !== "sawtooth"
-    )
-      return DEFAULT_WAVEFORM;
-    return stored;
-  });
-  const setWaveform = useCallback((value: WaveformType) => {
-    setWaveformState(value);
-  }, []);
-
-  const [attack, setAttackState] = useState(() => {
-    const stored = localStorage.getItem(ATTACK_LOCAL_STORAGE_KEY);
-    if (stored == null) return DEFAULT_ATTACK;
-    const n = Number(stored);
-    return Number.isFinite(n) && n >= ATTACK_MIN && n <= ATTACK_MAX
-      ? n
-      : DEFAULT_ATTACK;
-  });
-  const setAttack = useCallback((value: number) => {
-    const clamped = Math.max(ATTACK_MIN, Math.min(ATTACK_MAX, value));
-    setAttackState(clamped);
-  }, []);
-
-  const [noteDuration, setNoteDurationState] = useState(() => {
-    const stored = localStorage.getItem(NOTE_DURATION_LOCAL_STORAGE_KEY);
-    if (stored == null) return DEFAULT_NOTE_DURATION;
-    const n = Number(stored);
-    return Number.isFinite(n) &&
-      n >= NOTE_DURATION_MIN &&
-      n <= NOTE_DURATION_MAX
-      ? n
-      : DEFAULT_NOTE_DURATION;
-  });
-  const setNoteDuration = useCallback((value: number) => {
-    const clamped = Math.max(
-      NOTE_DURATION_MIN,
-      Math.min(NOTE_DURATION_MAX, value),
-    );
-    setNoteDurationState(clamped);
-  }, []);
-
   const resetContext = useCallback(() => {
     setTracks([createInitialTrack()]);
-    setTitle("");
-    setArtist("");
-    setTempoState(DEFAULT_TEMPO);
-    setWaveformState(DEFAULT_WAVEFORM);
-    setAttackState(DEFAULT_ATTACK);
-    setNoteDurationState(DEFAULT_NOTE_DURATION);
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tracks));
   }, [tracks]);
-
-  useEffect(() => {
-    localStorage.setItem(TITLE_LOCAL_STORAGE_KEY, title);
-  }, [title]);
-
-  useEffect(() => {
-    localStorage.setItem(ARTIST_LOCAL_STORAGE_KEY, artist);
-  }, [artist]);
-
-  useEffect(() => {
-    localStorage.setItem(TEMPO_LOCAL_STORAGE_KEY, String(tempo));
-  }, [tempo]);
-
-  useEffect(() => {
-    localStorage.setItem(WAVEFORM_LOCAL_STORAGE_KEY, waveform);
-  }, [waveform]);
-
-  useEffect(() => {
-    localStorage.setItem(ATTACK_LOCAL_STORAGE_KEY, String(attack));
-  }, [attack]);
-
-  useEffect(() => {
-    localStorage.setItem(NOTE_DURATION_LOCAL_STORAGE_KEY, String(noteDuration));
-  }, [noteDuration]);
-
-  // Apply share URL payload to context on initial load
-  const appliedShareRef = useRef(false);
-  useEffect(() => {
-    if (appliedShareRef.current) return;
-    appliedShareRef.current = true;
-    const payload = decodeSharePayload(
-      window.location.href.split("/").pop() || "",
-    );
-    if (payload) {
-      setTitle(payload.title);
-      setArtist(payload.artist);
-    }
-  }, [setTitle, setArtist]);
-
-  const playSequence = useCallback(async () => {
-    await Tone.start();
-
-    Tone.getTransport().stop();
-    Tone.getTransport().cancel();
-    Tone.getTransport().bpm.value = tempo;
-
-    const synth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: waveform },
-      envelope: { attack },
-    }).toDestination();
-    const secondsPerBeat = 60 / tempo;
-
-    tracks.forEach((track) => {
-      track.notes.forEach((note, index) => {
-        Tone.getTransport().schedule((time) => {
-          synth.triggerAttackRelease(
-            Tone.Frequency(note, "midi").toNote(),
-            noteDuration,
-            time,
-            0.8,
-          );
-        }, index * secondsPerBeat);
-      });
-    });
-
-    Tone.getTransport().start();
-  }, [tracks, tempo, waveform, attack, noteDuration]);
 
   const addTrack = useCallback(() => {
     setTracks((prev) => [...prev, createInitialTrack()]);
@@ -294,24 +123,11 @@ export function TrackProvider({ children }: { children: ReactNode }) {
 
   const value: TrackContextValue = {
     tracks,
-    title,
-    artist,
-    tempo,
-    waveform,
-    attack,
-    noteDuration,
-    setTitle,
-    setArtist,
-    setTempo,
-    setWaveform,
-    setAttack,
-    setNoteDuration,
     addTrack,
     removeTrack,
     addNote,
     removeNote,
     changeNote,
-    playSequence,
     resetContext,
   };
 
