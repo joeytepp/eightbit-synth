@@ -2,9 +2,12 @@ import React from "react";
 import TuningPeg from "../TuningPeg/TuningPeg";
 import { GUITAR_STRING_ORDER } from "../../constants";
 import { usePegContext } from "../../contexts/PegContext";
+import useCopyTab from "../../utils/copyTab";
 
 export default function TrackList() {
   const { playAllNotes, stopPlayback, isPlaying } = usePegContext();
+
+  const { copyTab, isCopied } = useCopyTab();
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -24,6 +27,9 @@ export default function TrackList() {
             ⏹️ Stop
           </button>
         )}
+        <button type="button" onClick={copyTab}>
+          {isCopied ? "☑️ Copied!" : "📋 Copy Tab"}
+        </button>
       </div>
       <div id="tuning-pegs">
         {GUITAR_STRING_ORDER.map((note) => (

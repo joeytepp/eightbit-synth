@@ -230,7 +230,9 @@ export function PegProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(NOTE_DURATION_LOCAL_STORAGE_KEY);
     if (stored == null) return DEFAULT_NOTE_DURATION;
     const n = Number(stored);
-    return Number.isFinite(n) && n >= NOTE_DURATION_MIN && n <= NOTE_DURATION_MAX
+    return Number.isFinite(n) &&
+      n >= NOTE_DURATION_MIN &&
+      n <= NOTE_DURATION_MAX
       ? n
       : DEFAULT_NOTE_DURATION;
   });
@@ -378,7 +380,15 @@ export function PegProvider({ children }: { children: ReactNode }) {
       activeSynthRef.current = null;
       setIsPlaying(false);
     }, remainingMs);
-  }, [pegCells, lettersByPeg, stopPlayback, tempo, waveform, attack, noteDuration]);
+  }, [
+    pegCells,
+    lettersByPeg,
+    stopPlayback,
+    tempo,
+    waveform,
+    attack,
+    noteDuration,
+  ]);
 
   const resetPegContext = useCallback(() => {
     setLettersByPegState(getInitialLetters());

@@ -88,7 +88,14 @@ export const STANDARD_TUNING_NOTES: Record<string, number> =
   );
 
 // Guitar: 6 strings, standard tuning. Top = high E, bottom = low E (display order).
-export const GUITAR_STRING_ORDER = ["E4", "B3", "G3", "D3", "A2", "E2"] as const;
+export const GUITAR_STRING_ORDER = [
+  "E4",
+  "B3",
+  "G3",
+  "D3",
+  "A2",
+  "E2",
+] as const;
 export const GUITAR_OPEN_MIDI: Record<string, number> = {
   E4: 64,
   B3: 59,
@@ -97,21 +104,38 @@ export const GUITAR_OPEN_MIDI: Record<string, number> = {
   A2: 45,
   E2: 40,
 };
+//TODO: Get rid of this constant and make this dynamic
 export const PEG_CELL_COUNT = 61; // frets 0 (open) through 60
 export const PEG_LETTERS_STORAGE_KEY = "synth-project-peg-letters";
 export const PEG_CELLS_STORAGE_KEY = "synth-project-peg-cells";
 
 const SEMITONE_MAP: Record<string, number> = {
-  C: 0, "C#": 1, Db: 1,
-  D: 2, "D#": 3, Eb: 3,
-  E: 4, Fb: 4,
-  F: 5, "E#": 5, "F#": 6, Gb: 6,
-  G: 7, "G#": 8, Ab: 8,
-  A: 9, "A#": 10, Bb: 10,
-  B: 11, Cb: 11,
+  C: 0,
+  "C#": 1,
+  Db: 1,
+  D: 2,
+  "D#": 3,
+  Eb: 3,
+  E: 4,
+  Fb: 4,
+  F: 5,
+  "E#": 5,
+  "F#": 6,
+  Gb: 6,
+  G: 7,
+  "G#": 8,
+  Ab: 8,
+  A: 9,
+  "A#": 10,
+  Bb: 10,
+  B: 11,
+  Cb: 11,
 };
 
-export function noteLetterToMidi(letter: string, octave: number): number | null {
+export function noteLetterToMidi(
+  letter: string,
+  octave: number,
+): number | null {
   const semi = SEMITONE_MAP[letter] ?? SEMITONE_MAP[letter.toUpperCase()];
   if (semi === undefined) return null;
   return 12 * (octave + 1) + semi;
