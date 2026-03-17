@@ -15,8 +15,19 @@ export default function useCopyTab() {
     });
   });
 
+  let lastIndex = 0;
+  tab.forEach((row) => {
+    row.forEach((cell, index) => {
+      if (cell !== "-" && index >= lastIndex) {
+        lastIndex = index;
+      }
+    });
+  });
+
   const copyTab = () => {
-    navigator.clipboard.writeText(tab.map((row) => row.join("-")).join("\n"));
+    navigator.clipboard.writeText(
+      tab.map((row) => row.slice(0, lastIndex + 1).join("-")).join("\n"),
+    );
     setIsCopied(true);
   };
 
