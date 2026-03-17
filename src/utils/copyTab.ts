@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { usePegContext } from "../contexts/PegContext";
+import { useTabContext } from "../contexts/TabContext";
 
 export default function useCopyTab() {
   const [isCopied, setIsCopied] = useState(false);
-  const { pegCells } = usePegContext();
+  const { tabNotes } = useTabContext();
 
   const tab = [
-    ...Object.keys(pegCells).map((key) => [key.replaceAll(/\d+/g, ""), "|"]),
+    ...Object.keys(tabNotes).map((key) => [key.replaceAll(/\d+/g, ""), "|"]),
   ];
 
-  Object.values(pegCells).forEach((cell, index) => {
+  Object.values(tabNotes).forEach((cell, index) => {
     cell.forEach((cell) => {
       tab[index]?.push(cell);
     });

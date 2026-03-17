@@ -1,5 +1,5 @@
 import React from "react";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 import {
   type WaveformType,
   WAVEFORM_OPTIONS,
@@ -19,7 +19,7 @@ export default function SettingsModal() {
     setAttack,
     noteDuration,
     setNoteDuration,
-  } = usePegContext();
+  } = useTabContext();
 
   return (
     <div

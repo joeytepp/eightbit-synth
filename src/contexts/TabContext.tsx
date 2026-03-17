@@ -11,9 +11,9 @@ import * as Tone from "tone";
 import {
   GUITAR_STRING_ORDER,
   GUITAR_OPEN_MIDI,
-  PEG_CELL_COUNT,
-  PEG_LETTERS_STORAGE_KEY,
-  PEG_CELLS_STORAGE_KEY,
+  TAB_NOTE_COUNT,
+  TAB_LETTERS_STORAGE_KEY,
+  TAB_NOTES_STORAGE_KEY,
   noteLetterToMidi,
   octaveFromStringKey,
   TEMPO_LOCAL_STORAGE_KEY,
@@ -35,10 +35,10 @@ const ALLOWED_CELL_CHARS = "0123456789-";
 const FRET_MIN = 0;
 const FRET_MAX = 60;
 
-const PEG_ROW_ORDER: (keyof typeof GUITAR_OPEN_MIDI)[] = [
+const TAB_ROW_ORDER: (keyof typeof GUITAR_OPEN_MIDI)[] = [
   ...GUITAR_STRING_ORDER,
 ];
-const PEG_ROW_COUNT = PEG_ROW_ORDER.length;
+const TAB_ROW_COUNT = TAB_ROW_ORDER.length;
 
 function parseFretValue(value: string): string {
   if (value === "" || value === "-") return "-";
@@ -68,17 +68,17 @@ function getInitialLetters(): Record<string, string> {
   return initial;
 }
 
-function getInitialCells(): Record<string, string[]> {
+function getInitialTabNotes(): Record<string, string[]> {
   const initial: Record<string, string[]> = {};
   GUITAR_STRING_ORDER.forEach((note) => {
-    initial[note] = Array(PEG_CELL_COUNT).fill("-");
+    initial[note] = Array(TAB_NOTE_COUNT).fill("-");
   });
   return initial;
 }
 
 function loadLettersFromStorage(): Record<string, string> | null {
   try {
-    const raw = localStorage.getItem(PEG_LETTERS_STORAGE_KEY);
+    const raw = localStorage.getItem(TAB_LETTERS_STORAGE_KEY);
     if (raw == null) return null;
 
     const parsed = JSON.parse(raw) as unknown;
@@ -97,9 +97,9 @@ function loadLettersFromStorage(): Record<string, string> | null {
   }
 }
 
-function loadCellsFromStorage(): Record<string, string[]> | null {
+function loadTabNotesFromStorage(): Record<string, string[]> | null {
   try {
-    const raw = localStorage.getItem(PEG_CELLS_STORAGE_KEY);
+    const raw = localStorage.getItem(TAB_NOTES_STORAGE_KEY);
     if (raw == null) return null;
 
     const parsed = JSON.parse(raw) as unknown;
@@ -109,7 +109,7 @@ function loadCellsFromStorage(): Record<string, string[]> | null {
     const result: Record<string, string[]> = {};
     for (const note of GUITAR_STRING_ORDER) {
       const row = obj[note];
-      if (!Array.isArray(row) || row.length !== PEG_CELL_COUNT) return null;
+      if (!Array.isArray(row) || row.length !== TAB_NOTE_COUNT) return null;
       const valid = row.every(
         (c): c is string =>
           typeof c === "string" &&
@@ -125,23 +125,23 @@ function loadCellsFromStorage(): Record<string, string[]> | null {
   }
 }
 
-export interface PegContextValue {
-  lettersByPeg: Record<string, string>;
-  pegCells: Record<string, string[]>;
-  focusedPegCell: string | null;
+export interface TabContextValue {
+  tuningLetters: Record<string, string>;
+  tabNotes: Record<string, string[]>;
+  focusedTabNote: string | null;
   isPlaying: boolean;
   tempo: number;
   waveform: WaveformType;
   attack: number;
   noteDuration: number;
   setLetter: (note: string, letter: string) => void;
-  setPegCell: (note: string, cellIndex: number, value: string) => void;
-  handlePegCellKeyDown: (
+  setTabNote: (note: string, cellIndex: number, value: string) => void;
+  handleTabNoteKeyDown: (
     note: string,
     cellIndex: number,
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => void;
-  setFocusedPegCell: (key: string | null) => void;
+  setFocusedTabNote: (key: string | null) => void;
   registerCellRef: (cellKey: string, el: HTMLInputElement | null) => void;
   setTempo: (tempo: number) => void;
   setWaveform: (waveform: WaveformType) => void;
@@ -149,15 +149,15 @@ export interface PegContextValue {
   setNoteDuration: (noteDuration: number) => void;
   playAllNotes: () => Promise<void>;
   stopPlayback: () => void;
-  resetPegContext: () => void;
-  /** Apply challenge payload from URL (letters + cells). Clears focus. */
+  resetTabContext: () => void;
+  /** Apply challenge payload from URL (letters + tab notes). Clears focus. */
   applyChallengePayload: (
-    lettersByPeg: Record<string, string>,
-    pegCells: Record<string, string[]>,
+    tuningLetters: Record<string, string>,
+    tabNotes: Record<string, string[]>,
   ) => void;
 }
 
-export interface PegStringActions {
+export interface TabStringActions {
   letter: string;
   cells: string[];
   setLetter: (letter: string) => void;
@@ -172,20 +172,20 @@ export interface PegStringActions {
   registerCellRef: (cellKey: string, el: HTMLInputElement | null) => void;
 }
 
-const PegContext = createContext<PegContextValue | null>(null);
+const TabContext = createContext<TabContextValue | null>(null);
 
-export function PegProvider({ children }: { children: ReactNode }) {
-  const [lettersByPeg, setLettersByPegState] = useState<Record<string, string>>(
+export function TabProvider({ children }: { children: ReactNode }) {
+  const [tuningLetters, setTuningLettersState] = useState<Record<string, string>>(
     () => loadLettersFromStorage() ?? getInitialLetters(),
   );
 
-  const [pegCells, setPegCellsState] = useState<Record<string, string[]>>(
-    () => loadCellsFromStorage() ?? getInitialCells(),
+  const [tabNotes, setTabNotesState] = useState<Record<string, string[]>>(
+    () => loadTabNotesFromStorage() ?? getInitialTabNotes(),
   );
 
-  const [focusedPegCell, setFocusedPegCell] = useState<string | null>(null);
+  const [focusedTabNote, setFocusedTabNote] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const pegCellRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const tabNoteRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const activeSynthRef = useRef<Tone.PolySynth | null>(null);
   const playTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -243,15 +243,15 @@ export function PegProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLetter = useCallback((note: string, letter: string) => {
-    setLettersByPegState((prev) => ({ ...prev, [note]: letter }));
+    setTuningLettersState((prev) => ({ ...prev, [note]: letter }));
   }, []);
 
-  const setPegCell = useCallback(
+  const setTabNote = useCallback(
     (note: string, cellIndex: number, value: string) => {
       const parsed = parseFretValue(value);
-      setPegCellsState((prev) => {
+      setTabNotesState((prev) => {
         const next = { ...prev };
-        const row = [...(next[note] ?? Array(PEG_CELL_COUNT).fill("-"))];
+        const row = [...(next[note] ?? Array(TAB_NOTE_COUNT).fill("-"))];
         row[cellIndex] = parsed;
         next[note] = row;
         return next;
@@ -260,7 +260,7 @@ export function PegProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const handlePegCellKeyDown = useCallback(
+  const handleTabNoteKeyDown = useCallback(
     (
       note: string,
       cellIndex: number,
@@ -269,34 +269,34 @@ export function PegProvider({ children }: { children: ReactNode }) {
       const key = e.key;
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
         e.preventDefault();
-        const rowIndex = PEG_ROW_ORDER.indexOf(note);
+        const rowIndex = TAB_ROW_ORDER.indexOf(note);
         if (rowIndex === -1) return;
         let nextRow = rowIndex;
         let nextCol = cellIndex;
         if (key === "ArrowLeft") {
-          nextCol = (cellIndex - 1 + PEG_CELL_COUNT) % PEG_CELL_COUNT;
+          nextCol = (cellIndex - 1 + TAB_NOTE_COUNT) % TAB_NOTE_COUNT;
         } else if (key === "ArrowRight") {
-          nextCol = (cellIndex + 1) % PEG_CELL_COUNT;
+          nextCol = (cellIndex + 1) % TAB_NOTE_COUNT;
         } else if (key === "ArrowUp") {
-          nextRow = (rowIndex - 1 + PEG_ROW_COUNT) % PEG_ROW_COUNT;
+          nextRow = (rowIndex - 1 + TAB_ROW_COUNT) % TAB_ROW_COUNT;
         } else {
-          nextRow = (rowIndex + 1) % PEG_ROW_COUNT;
+          nextRow = (rowIndex + 1) % TAB_ROW_COUNT;
         }
-        const nextNote = PEG_ROW_ORDER[nextRow];
+        const nextNote = TAB_ROW_ORDER[nextRow];
         const nextCellKey = `${nextNote}-${nextCol}`;
-        setFocusedPegCell(nextCellKey);
+        setFocusedTabNote(nextCellKey);
         requestAnimationFrame(() => {
-          pegCellRefs.current[nextCellKey]?.focus();
-          pegCellRefs.current[nextCellKey]?.select();
+          tabNoteRefs.current[nextCellKey]?.focus();
+          tabNoteRefs.current[nextCellKey]?.select();
         });
         return;
       }
       if (key.length !== 1) return;
       if (ALLOWED_CELL_CHARS.includes(key)) {
         e.preventDefault();
-        setPegCellsState((prev) => {
+        setTabNotesState((prev) => {
           const next = { ...prev };
-          const row = [...(next[note] ?? Array(PEG_CELL_COUNT).fill("-"))];
+          const row = [...(next[note] ?? Array(TAB_NOTE_COUNT).fill("-"))];
           const current = row[cellIndex];
           const newValue =
             key === "-"
@@ -315,7 +315,7 @@ export function PegProvider({ children }: { children: ReactNode }) {
 
   const registerCellRef = useCallback(
     (cellKey: string, el: HTMLInputElement | null) => {
-      pegCellRefs.current[cellKey] = el;
+      tabNoteRefs.current[cellKey] = el;
     },
     [],
   );
@@ -347,15 +347,15 @@ export function PegProvider({ children }: { children: ReactNode }) {
     let scheduleTime = Tone.now();
     let lastNoteTime = scheduleTime;
 
-    for (let fretIndex = 0; fretIndex < PEG_CELL_COUNT; fretIndex += 1) {
+    for (let fretIndex = 0; fretIndex < TAB_NOTE_COUNT; fretIndex += 1) {
       const startTime = scheduleTime;
 
-      for (const note of PEG_ROW_ORDER) {
-        const letter = lettersByPeg[note] ?? note.slice(0, -1);
+      for (const note of TAB_ROW_ORDER) {
+        const letter = tuningLetters[note] ?? note.slice(0, -1);
         const octave = octaveFromStringKey(note);
         const openMidi =
           noteLetterToMidi(letter, octave) ?? GUITAR_OPEN_MIDI[note];
-        const row = pegCells[note] ?? [];
+        const row = tabNotes[note] ?? [];
         const cellValue = row[fretIndex];
         const fret = cellValue !== "-" ? parseInt(cellValue, 10) : null;
 
@@ -381,8 +381,8 @@ export function PegProvider({ children }: { children: ReactNode }) {
       setIsPlaying(false);
     }, remainingMs);
   }, [
-    pegCells,
-    lettersByPeg,
+    tabNotes,
+    tuningLetters,
     stopPlayback,
     tempo,
     waveform,
@@ -390,10 +390,10 @@ export function PegProvider({ children }: { children: ReactNode }) {
     noteDuration,
   ]);
 
-  const resetPegContext = useCallback(() => {
-    setLettersByPegState(getInitialLetters());
-    setPegCellsState(getInitialCells());
-    setFocusedPegCell(null);
+  const resetTabContext = useCallback(() => {
+    setTuningLettersState(getInitialLetters());
+    setTabNotesState(getInitialTabNotes());
+    setFocusedTabNote(null);
     setTempoState(DEFAULT_TEMPO);
     setWaveformState(DEFAULT_WAVEFORM);
     setAttackState(DEFAULT_ATTACK);
@@ -412,24 +412,24 @@ export function PegProvider({ children }: { children: ReactNode }) {
             : note.slice(0, -1).toUpperCase();
         const row = cells[note];
         safeCells[note] =
-          Array.isArray(row) && row.length === PEG_CELL_COUNT
+          Array.isArray(row) && row.length === TAB_NOTE_COUNT
             ? [...row]
-            : Array(PEG_CELL_COUNT).fill("-");
+            : Array(TAB_NOTE_COUNT).fill("-");
       });
-      setLettersByPegState(safeLetters);
-      setPegCellsState(safeCells);
-      setFocusedPegCell(null);
+      setTuningLettersState(safeLetters);
+      setTabNotesState(safeCells);
+      setFocusedTabNote(null);
     },
     [],
   );
 
   useEffect(() => {
-    localStorage.setItem(PEG_LETTERS_STORAGE_KEY, JSON.stringify(lettersByPeg));
-  }, [lettersByPeg]);
+    localStorage.setItem(TAB_LETTERS_STORAGE_KEY, JSON.stringify(tuningLetters));
+  }, [tuningLetters]);
 
   useEffect(() => {
-    localStorage.setItem(PEG_CELLS_STORAGE_KEY, JSON.stringify(pegCells));
-  }, [pegCells]);
+    localStorage.setItem(TAB_NOTES_STORAGE_KEY, JSON.stringify(tabNotes));
+  }, [tabNotes]);
 
   useEffect(() => {
     localStorage.setItem(TEMPO_LOCAL_STORAGE_KEY, String(tempo));
@@ -447,19 +447,19 @@ export function PegProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(NOTE_DURATION_LOCAL_STORAGE_KEY, String(noteDuration));
   }, [noteDuration]);
 
-  const value: PegContextValue = {
-    lettersByPeg,
-    pegCells,
-    focusedPegCell,
+  const value: TabContextValue = {
+    tuningLetters,
+    tabNotes,
+    focusedTabNote,
     isPlaying,
     tempo,
     waveform,
     attack,
     noteDuration,
     setLetter,
-    setPegCell,
-    handlePegCellKeyDown,
-    setFocusedPegCell,
+    setTabNote,
+    handleTabNoteKeyDown,
+    setFocusedTabNote,
     registerCellRef,
     setTempo,
     setWaveform,
@@ -467,36 +467,36 @@ export function PegProvider({ children }: { children: ReactNode }) {
     setNoteDuration,
     playAllNotes,
     stopPlayback,
-    resetPegContext,
+    resetTabContext,
     applyChallengePayload,
   };
 
-  return <PegContext.Provider value={value}>{children}</PegContext.Provider>;
+  return <TabContext.Provider value={value}>{children}</TabContext.Provider>;
 }
 
-export function usePegContext(): PegContextValue {
-  const ctx = useContext(PegContext);
+export function useTabContext(): TabContextValue {
+  const ctx = useContext(TabContext);
   if (ctx === null) {
-    throw new Error("usePegContext must be used within PegProvider");
+    throw new Error("useTabContext must be used within TabProvider");
   }
   return ctx;
 }
 
-export function usePegString(note: string): PegStringActions {
-  const ctx = usePegContext();
+export function useTabString(note: string): TabStringActions {
+  const ctx = useTabContext();
 
   return {
-    letter: ctx.lettersByPeg[note] ?? note.slice(0, -1).toUpperCase(),
-    cells: ctx.pegCells[note] ?? Array(PEG_CELL_COUNT).fill("-"),
+    letter: ctx.tuningLetters[note] ?? note.slice(0, -1).toUpperCase(),
+    cells: ctx.tabNotes[note] ?? Array(TAB_NOTE_COUNT).fill("-"),
     setLetter: (letter: string) => ctx.setLetter(note, letter),
     onCellChange: (cellIndex: number, value: string) =>
-      ctx.setPegCell(note, cellIndex, value),
+      ctx.setTabNote(note, cellIndex, value),
     onCellKeyDown: (cellIndex: number, e) =>
-      ctx.handlePegCellKeyDown(note, cellIndex, e),
+      ctx.handleTabNoteKeyDown(note, cellIndex, e),
     onCellFocus: (cellIndex: number) =>
-      ctx.setFocusedPegCell(`${note}-${cellIndex}`),
-    onCellBlur: () => ctx.setFocusedPegCell(null),
-    focusedCell: ctx.focusedPegCell,
+      ctx.setFocusedTabNote(`${note}-${cellIndex}`),
+    onCellBlur: () => ctx.setFocusedTabNote(null),
+    focusedCell: ctx.focusedTabNote,
     registerCellRef: ctx.registerCellRef,
   };
 }

@@ -1,6 +1,6 @@
 import Sqids from "sqids";
 import { TrackContextValue } from "../contexts/TrackContext";
-import { GUITAR_STRING_ORDER, PEG_CELL_COUNT } from "../constants";
+import { GUITAR_STRING_ORDER, TAB_NOTE_COUNT } from "../constants";
 
 export interface Track {
   id: string;
@@ -13,10 +13,10 @@ export interface SharePayload {
   tracks: TrackContextValue["tracks"];
 }
 
-/** Payload for challenge URLs: peg tab data + optional title/artist/tempo for display and playback. */
+/** Payload for challenge URLs: tab data + optional title/artist/tempo for display and playback. */
 export interface ChallengePayload {
-  lettersByPeg: Record<string, string>;
-  pegCells: Record<string, string[]>;
+  tuningLetters: Record<string, string>;
+  tabNotes: Record<string, string[]>;
   title?: string;
   artist?: string;
   tempo?: number;
@@ -72,15 +72,15 @@ const FRET_MAX = 60;
 function isValidChallengePayload(parsed: unknown): parsed is ChallengePayload {
   if (parsed == null || typeof parsed !== "object") return false;
   const p = parsed as Record<string, unknown>;
-  const letters = p.lettersByPeg;
-  const cells = p.pegCells;
+  const letters = p.tuningLetters;
+  const cells = p.tabNotes;
   if (letters == null || typeof letters !== "object") return false;
   if (cells == null || typeof cells !== "object") return false;
   for (const note of GUITAR_STRING_ORDER) {
     const l = (letters as Record<string, unknown>)[note];
     if (typeof l !== "string" || l.length > 1) return false;
     const row = (cells as Record<string, unknown>)[note];
-    if (!Array.isArray(row) || row.length !== PEG_CELL_COUNT) return false;
+    if (!Array.isArray(row) || row.length !== TAB_NOTE_COUNT) return false;
     const validCell = (c: unknown) =>
       c === "-" ||
       (typeof c === "string" &&

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
 import { useModal } from "../../contexts/ModalContext";
 import { hammingDistance } from "../../utils/shareUrl";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 
 const MAX_ATTEMPTS = 10;
 
@@ -22,7 +22,7 @@ export default function ChallengeModal() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  const { playAllNotes } = usePegContext();
+  const { playAllNotes } = useTabContext();
 
   if (!challengeAnswers) return null;
 

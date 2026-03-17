@@ -105,9 +105,9 @@ export const GUITAR_OPEN_MIDI: Record<string, number> = {
   E2: 40,
 };
 //TODO: Get rid of this constant and make this dynamic
-export const PEG_CELL_COUNT = 61; // frets 0 (open) through 60
-export const PEG_LETTERS_STORAGE_KEY = "synth-project-peg-letters";
-export const PEG_CELLS_STORAGE_KEY = "synth-project-peg-cells";
+export const TAB_NOTE_COUNT = 61; // frets 0 (open) through 60
+export const TAB_LETTERS_STORAGE_KEY = "synth-project-peg-letters";
+export const TAB_NOTES_STORAGE_KEY = "synth-project-peg-cells";
 
 const SEMITONE_MAP: Record<string, number> = {
   C: 0,

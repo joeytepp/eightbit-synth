@@ -1,15 +1,15 @@
 import React, { useCallback } from "react";
 import Cell from "../Cell/Cell";
-import { PEG_CELL_COUNT } from "../../constants";
-import { usePegString } from "../../contexts/PegContext";
+import { TAB_NOTE_COUNT } from "../../constants";
+import { useTabString } from "../../contexts/TabContext";
 
 const ALLOWED_LETTERS = "ABCDEFG";
 
-interface TuningPegProps {
+interface TabStringProps {
   note: string;
 }
 
-export default function TuningPeg({ note }: TuningPegProps) {
+export default function TabString({ note }: TabStringProps) {
   const {
     letter,
     cells,
@@ -20,9 +20,9 @@ export default function TuningPeg({ note }: TuningPegProps) {
     onCellBlur,
     focusedCell,
     registerCellRef,
-  } = usePegString(note);
+  } = useTabString(note);
 
-  const handlePegLetterChange = useCallback(
+  const handleTuningLetterChange = useCallback(
     (pegKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
       const upper = raw.toUpperCase();
@@ -34,7 +34,7 @@ export default function TuningPeg({ note }: TuningPegProps) {
     [setLetter],
   );
 
-  const handlePegKeyDown = useCallback(
+  const handleLetterKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       const key = e.key.toUpperCase();
       if (key.length === 1 && !ALLOWED_LETTERS.includes(key)) {
@@ -55,8 +55,8 @@ export default function TuningPeg({ note }: TuningPegProps) {
         autoComplete="off"
         maxLength={1}
         value={letter}
-        onChange={(e) => handlePegLetterChange(note, e)}
-        onKeyDown={handlePegKeyDown}
+        onChange={(e) => handleTuningLetterChange(note, e)}
+        onKeyDown={handleLetterKeyDown}
         style={{
           width: "1.5em",
           textAlign: "center",
@@ -65,7 +65,7 @@ export default function TuningPeg({ note }: TuningPegProps) {
       />
       :{" "}
       <div style={{ display: "flex", gap: "0.25rem" }}>
-        {Array.from({ length: PEG_CELL_COUNT }).map((_, i) => {
+        {Array.from({ length: TAB_NOTE_COUNT }).map((_, i) => {
           const cellKey = `${note}-${i}`;
           return (
             <Cell

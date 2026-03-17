@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
 import {
   encodeChallengePayload,
@@ -12,13 +12,13 @@ import {
 export default function ShareModal() {
   const { closeModal } = useModal();
   const { title, artist, setTitle, setArtist } = useChallengeContext();
-  const { lettersByPeg, pegCells, tempo } = usePegContext();
+  const { tuningLetters, tabNotes, tempo } = useTabContext();
   const [challengeCopied, setChallengeCopied] = useState(false);
 
   const handleCopyChallengeUrl = async () => {
     const payload = {
-      lettersByPeg,
-      pegCells,
+      tuningLetters,
+      tabNotes,
       ...(title ? { title } : undefined),
       ...(artist ? { artist } : undefined),
       ...(tempo >= 1 && tempo <= 300 ? { tempo } : undefined),

@@ -2,12 +2,12 @@ import React from "react";
 import ShareModal from "../ShareModal/ShareModal";
 import { useModal } from "../../contexts/ModalContext";
 import SettingsModal from "../SettingsModal/SettingsModal";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 
 export default function Header() {
   const { openModal } = useModal();
 
-  const { resetPegContext } = usePegContext();
+  const { resetTabContext } = useTabContext();
 
   return (
     <div
@@ -31,7 +31,7 @@ export default function Header() {
             const confirmed = window.confirm("Are you sure you want to reset?");
             if (!confirmed) return;
 
-            resetPegContext();
+            resetTabContext();
           }}
           title="Reset context"
         >

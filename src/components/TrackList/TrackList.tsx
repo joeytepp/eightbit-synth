@@ -1,11 +1,11 @@
 import React from "react";
-import TuningPeg from "../TuningPeg/TuningPeg";
+import TabString from "../TabString/TabString";
 import { GUITAR_STRING_ORDER } from "../../constants";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 import useCopyTab from "../../utils/copyTab";
 
 export default function TrackList() {
-  const { playAllNotes, stopPlayback, isPlaying } = usePegContext();
+  const { playAllNotes, stopPlayback, isPlaying } = useTabContext();
 
   const { copyTab, isCopied } = useCopyTab();
 
@@ -31,9 +31,9 @@ export default function TrackList() {
           {isCopied ? "☑️ Copied!" : "📋 Copy Tab"}
         </button>
       </div>
-      <div id="tuning-pegs">
+      <div id="tab-strings">
         {GUITAR_STRING_ORDER.map((note) => (
-          <TuningPeg key={note} note={note} />
+          <TabString key={note} note={note} />
         ))}
       </div>
     </div>

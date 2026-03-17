@@ -3,18 +3,18 @@ import {
   getChallengeParamsFromSearch,
   decodeChallengePayload,
 } from "../../utils/shareUrl";
-import { usePegContext } from "../../contexts/PegContext";
+import { useTabContext } from "../../contexts/TabContext";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
 import { useModal } from "../../contexts/ModalContext";
 import ChallengeModal from "../ChallengeModal/ChallengeModal";
 
 /**
  * Runs once on mount: if URL has ?mode=challenge&data=..., decodes the payload,
- * applies peg data (and optional tempo) to context, stores the challenge answers,
+ * applies tab data (and optional tempo) to context, stores the challenge answers,
  * and opens the ChallengeModal for the friend to guess title/artist.
  */
 export default function ChallengeLoader() {
-  const { applyChallengePayload, setTempo } = usePegContext();
+  const { applyChallengePayload, setTempo } = useTabContext();
   const { setChallengeAnswers } = useChallengeContext();
   const { openModal } = useModal();
   const appliedRef = useRef(false);
@@ -28,7 +28,7 @@ export default function ChallengeLoader() {
     if (!payload) return;
 
     appliedRef.current = true;
-    applyChallengePayload(payload.lettersByPeg, payload.pegCells);
+    applyChallengePayload(payload.tuningLetters, payload.tabNotes);
     if (payload.tempo != null && payload.tempo >= 1 && payload.tempo <= 300) {
       setTempo(payload.tempo);
     }

@@ -3,7 +3,7 @@ import Footer from "./components/Footer/Footer";
 import Modal from "./components/Modal/Modal";
 import ChallengeLoader from "./components/ChallengeLoader/ChallengeLoader";
 import { TrackProvider } from "./contexts/TrackContext";
-import { PegProvider } from "./contexts/PegContext";
+import { TabProvider } from "./contexts/TabContext";
 import { ModalProvider } from "./contexts/ModalContext";
 import { ChallengeProvider } from "./contexts/ChallengeContext";
 import Header from "./components/Header/Header";
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <div>
       <TrackProvider>
-        <PegProvider>
+        <TabProvider>
           <ChallengeProvider>
             <ModalProvider>
               <ChallengeLoader />
@@ -31,7 +31,7 @@ export default function App() {
               <Modal />
             </ModalProvider>
           </ChallengeProvider>
-        </PegProvider>
+        </TabProvider>
       </TrackProvider>
     </div>
   );
