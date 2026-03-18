@@ -3,7 +3,7 @@ import Cell from "../Cell/Cell";
 import { TAB_NOTE_COUNT } from "../../constants";
 import { useTabString } from "../../contexts/TabContext";
 
-const ALLOWED_LETTERS = "ABCDEFG";
+const ALLOWED_LETTER_REGEX = /^([ACDG][#b]?|[BE][b]?|F[#]?)$/;
 
 interface TabStringProps {
   note: string;
@@ -25,10 +25,13 @@ export default function TabString({ note }: TabStringProps) {
   const handleTuningLetterChange = useCallback(
     (pegKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const upper = raw.toUpperCase();
-      const last = upper.slice(-1);
-      if (last === "" || ALLOWED_LETTERS.includes(last)) {
-        setLetter(last);
+      if (raw === "") {
+        setLetter("");
+        return;
+      }
+      const normalized = raw[0].toUpperCase() + raw.slice(1).toLowerCase();
+      if (ALLOWED_LETTER_REGEX.test(normalized)) {
+        setLetter(normalized);
       }
     },
     [setLetter],
@@ -36,8 +39,7 @@ export default function TabString({ note }: TabStringProps) {
 
   const handleLetterKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      const key = e.key.toUpperCase();
-      if (key.length === 1 && !ALLOWED_LETTERS.includes(key)) {
+      if (e.key.length === 1 && !/^[A-Ga-g#b]$/.test(e.key)) {
         e.preventDefault();
       }
     },
@@ -53,14 +55,14 @@ export default function TabString({ note }: TabStringProps) {
         type="text"
         inputMode="text"
         autoComplete="off"
-        maxLength={1}
+        maxLength={2}
         value={letter}
         onChange={(e) => handleTuningLetterChange(note, e)}
         onKeyDown={handleLetterKeyDown}
         style={{
           width: "1.5em",
           textAlign: "center",
-          textTransform: "uppercase",
+          textTransform: "none",
         }}
       />
       :{" "}
