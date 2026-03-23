@@ -1,20 +1,58 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
-import { useTabContext } from "../../contexts/TabContext";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
-import { useEffect } from "react";
+import { useTabContext } from "../../contexts/TabContext";
+import { GUITAR_STRING_ORDER, TAB_NOTE_COUNT } from "../../constants";
 
 export default function ShareModal() {
-  const { closeModal, isOpen } = useModal();
+  const { closeModal } = useModal();
   const { title, artist, setTitle, setArtist } = useChallengeContext();
-  const { tuningLetters } = useTabContext();
+  const { tabNotes, tuningLetters } = useTabContext();
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (!isOpen) return;
+  const buildShareUrl = useCallback(() => {
+    const tuning = GUITAR_STRING_ORDER.map(
+      (note) => tuningLetters[note] ?? note.slice(0, -1).toUpperCase(),
+    ).join("");
 
-    window.alert(JSON.stringify(tuningLetters));
-  }, [isOpen]);
+    let lastCol = -1;
+    for (let col = TAB_NOTE_COUNT - 1; col >= 0; col--) {
+      if (
+        GUITAR_STRING_ORDER.some((note) => {
+          const val = tabNotes[note]?.[col];
+          return val && val !== "-";
+        })
+      ) {
+        lastCol = col;
+        break;
+      }
+    }
+
+    const columns: string[] = [];
+    for (let col = 0; col <= lastCol; col++) {
+      columns.push(
+        GUITAR_STRING_ORDER.map((note) => tabNotes[note]?.[col] ?? "-").join(
+          ".",
+        ),
+      );
+    }
+
+    const url = new URL(window.location.origin + window.location.pathname);
+    url.searchParams.set("tuning", tuning);
+    if (columns.length > 0) {
+      url.searchParams.set("notes", columns.join(","));
+    }
+    return url.toString();
+  }, [tabNotes, tuningLetters]);
+
+  const handleCopyUrl = useCallback(async () => {
+    const url = buildShareUrl();
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [buildShareUrl]);
 
   return (
     <>
@@ -93,10 +131,10 @@ export default function ShareModal() {
             <button
               disabled={!title || !artist}
               type="button"
-              onClick={() => {}}
+              onClick={handleCopyUrl}
               style={{ marginBottom: "1rem" }}
             >
-              Copy URL
+              {copied ? "Copied!" : "Copy URL"}
             </button>
           </section>
 
