@@ -11,8 +11,9 @@ import {
   TITLE_LOCAL_STORAGE_KEY,
   ARTIST_LOCAL_STORAGE_KEY,
 } from "../constants";
-import { decodeSharePayload } from "../utils/shareUrl";
 
+// TODO: Implement
+const decodeSharePayload = (payload: string) => {};
 export interface ChallengeAnswers {
   title: string;
   artist: string;
@@ -61,13 +62,13 @@ export function ChallengeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (appliedShareRef.current) return;
     appliedShareRef.current = true;
-    const payload = decodeSharePayload(
-      window.location.href.split("/").pop() || "",
-    );
-    if (payload) {
-      setTitle(payload.title);
-      setArtist(payload.artist);
-    }
+    // const payload = decodeSharePayload(
+    //   window.location.href.split("/").pop() || "",
+    // );
+    // if (payload) {
+    //   setTitle(payload.title);
+    //   setArtist(payload.artist);
+    // }
   }, []);
 
   return (

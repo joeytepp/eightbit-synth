@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import TabString from "../TabString/TabString";
 import { GUITAR_STRING_ORDER } from "../../constants";
 import { useTabContext } from "../../contexts/TabContext";
 import useCopyTab from "../../utils/copyTab";
+import useUrlParams from "../../hooks/use-url-params";
 
 export default function TrackList() {
   const { playAllNotes, stopPlayback, isPlaying } = useTabContext();
 
-  const { copyTab, isCopied } = useCopyTab();
+  const { loadUrlParams, overrideNoteOrder } = useUrlParams();
+  const { isCopied, copyTab } = useCopyTab();
+
+  useEffect(() => {
+    loadUrlParams();
+  }, [loadUrlParams]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -32,8 +38,12 @@ export default function TrackList() {
         </button>
       </div>
       <div id="tab-strings">
-        {GUITAR_STRING_ORDER.map((note) => (
-          <TabString key={note} note={note} />
+        {GUITAR_STRING_ORDER.map((note, i) => (
+          <TabString
+            key={note}
+            note={note}
+            overrideNote={overrideNoteOrder[i]}
+          />
         ))}
       </div>
     </div>

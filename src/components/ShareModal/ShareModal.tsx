@@ -1,36 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { useModal } from "../../contexts/ModalContext";
 import { useTabContext } from "../../contexts/TabContext";
 import { useChallengeContext } from "../../contexts/ChallengeContext";
-import {
-  encodeChallengePayload,
-  buildChallengeUrl,
-} from "../../utils/shareUrl";
+import { useEffect } from "react";
 
 export default function ShareModal() {
-  const { closeModal } = useModal();
+  const { closeModal, isOpen } = useModal();
   const { title, artist, setTitle, setArtist } = useChallengeContext();
-  const { tuningLetters, tabNotes, tempo } = useTabContext();
-  const [challengeCopied, setChallengeCopied] = useState(false);
+  const { tuningLetters } = useTabContext();
 
-  const handleCopyChallengeUrl = async () => {
-    const payload = {
-      tuningLetters,
-      tabNotes,
-      ...(title ? { title } : undefined),
-      ...(artist ? { artist } : undefined),
-      ...(tempo >= 1 && tempo <= 300 ? { tempo } : undefined),
-    };
-    const encoded = encodeChallengePayload(payload);
-    const url = buildChallengeUrl(encoded);
+  useEffect(() => {
+    if (!isOpen) return;
 
-    await navigator.clipboard.writeText(url);
-
-    setChallengeCopied(true);
-    setTimeout(() => setChallengeCopied(false), 2000);
-  };
+    window.alert(JSON.stringify(tuningLetters));
+  }, [isOpen]);
 
   return (
     <>
@@ -109,10 +93,10 @@ export default function ShareModal() {
             <button
               disabled={!title || !artist}
               type="button"
-              onClick={handleCopyChallengeUrl}
+              onClick={() => {}}
               style={{ marginBottom: "1rem" }}
             >
-              {challengeCopied ? "Copied!" : "Copy challenge URL"}
+              Copy URL
             </button>
           </section>
 

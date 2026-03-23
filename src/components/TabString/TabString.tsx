@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import Cell from "../Cell/Cell";
 import { TAB_NOTE_COUNT } from "../../constants";
 import { useTabString } from "../../contexts/TabContext";
@@ -7,9 +7,10 @@ const ALLOWED_LETTER_REGEX = /^([ACDG][#b]?|[BE][b]?|F[#]?)$/;
 
 interface TabStringProps {
   note: string;
+  overrideNote?: string | null;
 }
 
-export default function TabString({ note }: TabStringProps) {
+export default function TabString({ note, overrideNote }: TabStringProps) {
   const {
     letter,
     cells,
@@ -23,8 +24,11 @@ export default function TabString({ note }: TabStringProps) {
   } = useTabString(note);
 
   const handleTuningLetterChange = useCallback(
-    (pegKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
+    (
+      pegKey: string,
+      value: React.ChangeEvent<HTMLInputElement>["target"]["value"],
+    ) => {
+      const raw = value;
       if (raw === "") {
         setLetter("");
         return;
@@ -46,6 +50,14 @@ export default function TabString({ note }: TabStringProps) {
     [],
   );
 
+  useEffect(() => {
+    if (!overrideNote || overrideNote === note) {
+      return;
+    }
+
+    handleTuningLetterChange(note, overrideNote);
+  });
+
   return (
     <div
       key={note}
@@ -57,7 +69,7 @@ export default function TabString({ note }: TabStringProps) {
         autoComplete="off"
         maxLength={2}
         value={letter}
-        onChange={(e) => handleTuningLetterChange(note, e)}
+        onChange={(e) => handleTuningLetterChange(note, e.target.value)}
         onKeyDown={handleLetterKeyDown}
         style={{
           width: "1.5em",

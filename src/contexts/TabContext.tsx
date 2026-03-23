@@ -175,9 +175,9 @@ export interface TabStringActions {
 const TabContext = createContext<TabContextValue | null>(null);
 
 export function TabProvider({ children }: { children: ReactNode }) {
-  const [tuningLetters, setTuningLettersState] = useState<Record<string, string>>(
-    () => loadLettersFromStorage() ?? getInitialLetters(),
-  );
+  const [tuningLetters, setTuningLettersState] = useState<
+    Record<string, string>
+  >(() => loadLettersFromStorage() ?? getInitialLetters());
 
   const [tabNotes, setTabNotesState] = useState<Record<string, string[]>>(
     () => loadTabNotesFromStorage() ?? getInitialTabNotes(),
@@ -424,7 +424,10 @@ export function TabProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    localStorage.setItem(TAB_LETTERS_STORAGE_KEY, JSON.stringify(tuningLetters));
+    localStorage.setItem(
+      TAB_LETTERS_STORAGE_KEY,
+      JSON.stringify(tuningLetters),
+    );
   }, [tuningLetters]);
 
   useEffect(() => {

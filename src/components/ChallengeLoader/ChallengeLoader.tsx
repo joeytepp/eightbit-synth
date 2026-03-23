@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import {
-  getChallengeParamsFromSearch,
-  decodeChallengePayload,
-} from "../../utils/shareUrl";
-import { useTabContext } from "../../contexts/TabContext";
-import { useChallengeContext } from "../../contexts/ChallengeContext";
-import { useModal } from "../../contexts/ModalContext";
-import ChallengeModal from "../ChallengeModal/ChallengeModal";
+// import {
+//   getChallengeParamsFromSearch,
+//   decodeChallengePayload,
+// } from "../../utils/shareUrl";
+// import { useTabContext } from "../../contexts/TabContext";
+// import { useChallengeContext } from "../../contexts/ChallengeContext";
+// import { useModal } from "../../contexts/ModalContext";
+// import ChallengeModal from "../ChallengeModal/ChallengeModal";
 
 /**
  * Runs once on mount: if URL has ?mode=challenge&data=..., decodes the payload,
@@ -14,29 +14,30 @@ import ChallengeModal from "../ChallengeModal/ChallengeModal";
  * and opens the ChallengeModal for the friend to guess title/artist.
  */
 export default function ChallengeLoader() {
-  const { applyChallengePayload, setTempo } = useTabContext();
-  const { setChallengeAnswers } = useChallengeContext();
-  const { openModal } = useModal();
+  // const { applyChallengePayload, setTempo } = useTabContext();
+  // const { setChallengeAnswers } = useChallengeContext();
+  // const { openModal } = useModal();
   const appliedRef = useRef(false);
 
   useEffect(() => {
     if (appliedRef.current) return;
-    const params = getChallengeParamsFromSearch(window.location.search);
-    if (!params) return;
+    // const params = getChallengeParamsFromSearch(window.location.search);
+    // if (!params) return;
 
-    const payload = decodeChallengePayload(params.data);
-    if (!payload) return;
+    // const payload = decodeChallengePayload(params.data);
+    // if (!payload) return;
 
     appliedRef.current = true;
-    applyChallengePayload(payload.tuningLetters, payload.tabNotes);
-    if (payload.tempo != null && payload.tempo >= 1 && payload.tempo <= 300) {
-      setTempo(payload.tempo);
-    }
-    window.localStorage.setItem("challenge-payload", JSON.stringify(payload));
+    // applyChallengePayload(payload.tuningLetters, payload.tabNotes);
+    // if (payload.tempo != null && payload.tempo >= 1 && payload.tempo <= 300) {
+    //   setTempo(payload.tempo);
+    // }
+    // window.localStorage.setItem("challenge-payload", JSON.stringify(payload));
 
-    setChallengeAnswers(payload.title ?? "", payload.artist ?? "");
-    openModal(<ChallengeModal />);
-  }, [applyChallengePayload, setTempo, setChallengeAnswers, openModal]);
+    // setChallengeAnswers(payload.title ?? "", payload.artist ?? "");
+    // openModal(<ChallengeModal />);
+    // }, [applyChallengePayload, setTempo, setChallengeAnswers, openModal]);
+  }, []);
 
   return null;
 }
